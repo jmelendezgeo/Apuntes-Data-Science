@@ -1106,7 +1106,21 @@ El query tiene básicamente 2 partes: **SELECT** y **FROM**. Puede aparecer una 
 
 La estrellita o asterisco (*) quiere decir que vamos a seleccionar todo sin filtrar campos.
 
-Antes de iniciar la clase corre este script
+Antes de iniciar la clase corre este script para rellenar tu base de datos.
+
+Un ejemplo de un Query con su estructura seria: 
+
+```sql
+SELECT city, count(*) AS total
+FROM people
+WHERE active = true
+GROUP BY city
+ORDER BY total DESC
+HAVING total >=2;
+```
+
+Aqui tenemos una consulta que nos buscara de personas, aquellas que tengan active = true, agrupados por ciudad y ordenados de forma descendente. Filtrando aquellas ciudades que tengan mas de dos personas
+
 
 ```sql
 Script de la base datos platziblog
@@ -1341,9 +1355,9 @@ INSERT INTO `platziblog.posts_etiquetas` (`id`,`post_id`,`etiqueta_id`) VALUES (
 #### Primer Consulta
 
 ```sql
-SELECT*
-FROM posts
-WHERE fecha_publicacion < '2024'
+SELECT * 
+FROM platziblog.posts
+WHERE fecha_publicacion < '2024';
 ```
 
 ### Clase 30 SELECT
@@ -1352,43 +1366,63 @@ WHERE fecha_publicacion < '2024'
 
 - El nombre de las columnas o campos que estamos consultando puede ser cambiado utilizando AS después del nombre del campo y poniendo el nuevo que queremos tener:
 
+
+El **SELECT** (*) es utilizado para mostrar todo. Una sentencia SELECT no puede estar sola, necesita tambien el FROM para indicar donde realizar la consulta.
+
+
+Cuando utilizamos SELECT con AS lo que hacemos es renombrar la consulta que estamos trabajando. Por ejemplo, a continuación si queremos referirnos a titulo en esta consulta sería a través de 'encabezado'
+
 ```sql
 SELECT titulo AS encabezado
-FROM posts;
+FROM platziblog.posts;
 ```
 
 Existe una función de SELECT para poder contar la cantidad de registros. Esa información (un número) será el resultado del query:
 
 ```sql
 SELECT COUNT(*)
-FROM posts;
+FROM platziblog.posts;
 ```
 
-Queries de la clase
+Podemos hacer querys con solo determinados campos ( no todo, con el * ), por ejemplo, consultaremos titulo, fecha de publicacion y estatus.
 
 ```sql
 
 SELECT titulo, fecha_publicacion, estatus
-FROM posts
+FROM platziblog.posts
 ```
 
-Usando AS para asignar un alias
+
+
+Usando AS para asignar un alias. Si hacemos esto podemos jugar con el nombre de las columas y cambiarlos en la consulta. Notamos como AS se agrega antes de la coma.
+
+Entonces, en Querys mas complejos, podemos referirnos a estas columas mediante los alias.
 
 ```sql
 SELECT titulo, fecha_publicacion AS publicado_en, estatus  AS estado
-FROM posts;
+FROM platziblog.posts;
 ```
 
-Contar los registros
+Contar los registros. Aqui con COUNT(*) nos retornara un conteo final. COUNT va tupla por tupla por todos los registros y muestra el numero final de registros, por ejemplo, 22. 
+
+Tambien puede añadirse un alias
 
 ```sql
 SELECT COUNT(*) AS numero_post
-FROM posts;
+FROM platziblog.posts;
 ```
+
+```sql
+SELECT COUNT(*) AS total_registros
+FROM platziblog.posts
+WHERE estatus = 'activo';
+```
+
+
 
 ### Clase 31 FROM
 
-**FROM** indica de dónde se deben traer los datos y puede ayudar a hacer sentencias y filtros complejos cuando se quieren unir tablas. La sentencia compañera que nos ayuda con este proceso es **JOIN**.
+**FROM** indica de dónde se deben traer los datos. Puede mostrar informacion de una tabla pero tambien da la posibildiad de mostrar informacion proveniente de distintas tablas. Por ejemplo, vemos que en nuestra base de datos la informacion esta repartida en distintas tablas para mantener la normalización, pero **FROM** puede ayudar a hacer sentencias y filtros complejos cuando se quieren unir tablas. La sentencia compañera que nos ayuda con este proceso es **JOIN**.
 
 Los diagramas de Venn son círculos que se tocan en algún punto para ver dónde está la intersección de conjuntos. Ayudan mucho para poder formular la sentencia **JOIN** de la manera adecuada dependiendo del query que se quiere hacer.
 
@@ -1396,11 +1430,23 @@ Los diagramas de Venn son círculos que se tocan en algún punto para ver dónde
 
 ![teoria_conjuntos_sentencias](src/teoria_conjuntos_sentencias.jpg)
 
+
+Otro tipo de JOIN serian:
+
+* Interseccion / INNER JOIN: Es el mas comun. Tiene que ver con traer los valores que existen tanto en A como en B
+
+* UNION/ FULL OUTER JOIN : Traer todo. No importa si el usuario tiene o no posts, si el posts tiene o no usuario.
+
+*Diferencia simetrica/ FULL OUTER JOIN: Es una union - Interseccion. Trae los datos que esten en A que no esten en B y los datos de B que no esten en A
+
+
 ### Clase 32 Utilizando la sentencia FROM
 
 Comandos de la clase
 
-Left Join  trae todos los usuarios (tabla A), tengan o no tengan algún Post (tabla b)
+**Left Join**
+
+Trae todos los usuarios (tabla A), tengan o no tengan algún Post (tabla b)
 
 ```sql
 SELECT *
@@ -1408,7 +1454,11 @@ FROM usuarios
  LEFT JOIN posts ON usuarios.id = posts.usuario_id;
 ```
 
-Left Join sin intersección
+Aqui como vemos se tomo un LEFT JOIN que tomara la tabla de la izquierda (la primera que pasamos) como tabla A. Entonces, hara un LEFT JOIN a partir de los ids de ambas tablas (Sentencia **ON**). Selecciona todo de la tabla usuario y unela con la tabla posts a partir de sus llaves.
+
+Con este query podemos saber cuales posts escribieron cuales usuarios.
+
+**Left Join sin intersección**
 
 ```sql
 SELECT *
@@ -1417,15 +1467,25 @@ FROM usuarios
 WHERE posts.usuario_id IS NULL;
 ```
 
+Con este Query lo que hacemos es sacar a los usuarios que si tienen posts. Por lo tanto, solamente estamos pidiendo los usuarios que no hayan publicado un posts.
+
+
 Left Join  trae todos los Post (tabla B), tengan o no tengan algún Usuario (tabla A)
+
+
+Ahora apliquemos el Right Join, es decir, antes habiamos pensando en usuarios que tienen posts, ahora pensaremos en posts que tienen usuarios.
 
 ```sql
 SELECT *
 FROM usuarios
  RIGHT JOIN posts ON usuarios.id = posts.usuario_id;
 ```
+Por ejemplo, esta consulta vemos que nos trajo tambien un posts huerfano que no tienen usuario y los usuarios de los post.
 
-Right Join sin intersección
+
+**Right Join sin intersección**
+
+Esta vez vamos a exluir a los usuarios. Es decir, esta consulta me retornara los posts que no tienen usuario.
 
 ```sql
 SELECT *
@@ -1434,7 +1494,11 @@ FROM usuarios
 WHERE posts.usuario_id IS NULL;
 ```
 
-Inner Join
+
+**Inner Join**
+
+Esta vez queremos las intersecciones. Solamente me importan los datos que estan relacionados (usuarios que tengan posts)
+
 
 ```sql
 SELECT *
@@ -1442,7 +1506,12 @@ FROM usuarios
  INNER JOIN posts ON usuarios.id = posts.usuario_id;
 ```
 
-Full Join
+**Full Join**
+
+Hay manejadores que tienen y no tienen comandos para diferenciar un FULL JOIN y una Diferencia asimetrica. Hay manejadores que tienen un comando FULL OUTER JOIN, pero no es el caso de MYSQL
+
+
+Esta vez haremos un query un poco mas complejo pero estandar. Haremos una union de todos los usuarios qe tengan posts y luego agarraremos los posts que faltan. Si vemos nuestros diagramas, estariamos tomando todo el conjunto
 
 ```sql
 SELECT *
@@ -1454,7 +1523,14 @@ FROM usuarios
  RIGHT JOIN posts ON usuarios.id = posts.usuario_id;
 ```
 
+La primera sentencia nos esta trayendo todos los usuarios que tienen posts y la segunda todos los posts que tienen usuario. Estas unidas, nos estarian trayendo todos los usuarios y todos los posts asociados por un id (incluso posts sin usuarios o usuarios sin posts)
+
+
 Diferencia Asimétrica
+
+Esta vez queremos traer los usuarios sin posts y los posts sin usuarios.
+
+Para esto tendremos que excluir con WHERE y NULL.
 
 ```sql
 SELECT *
@@ -1468,30 +1544,37 @@ FROM usuarios
 WHERE posts.usuario_id IS NULL;
 ```
 
+Asi como en estos ejemplos juntamos dos tablas, podemos traer más y hacer el Query con el FROM tan complejo como se quiera. 
+
+
 ### Clase 33 WHERE
 
 **WHERE** es la sentencia que nos ayuda a filtrar tuplas o registros dependiendo de las características que elegimos.
+Esta vez filtramos por columnas. Podemos usarla para filtrar de acuerdo a criterios como una fecha, una cantidad, etc.
 
 - La propiedad **LIKE** nos ayuda a traer registros de los cuales conocemos sólo una parte de la información.
 - La propiedad **BETWEEN** nos sirve para arrojar registros que estén en el medio de dos. Por ejemplo los registros con id entre 20 y 30
 
 Queries de la clase
 
-Filtrando de forma numérica
+**Filtrando de forma numérica**
 
+Podemos filtrar por ejemplo, que retorne los posts con id >= que 50
 ```sql
 SELECT *
 FROM posts
-WHERE id <= 10 ;
+WHERE id <= 50 ;
 ```
 
-Filtrando con strings
+**Filtrando con strings**
 
+El operador = funciona excelente con cadena cuando sabes lo que puede decir. Por ejemplo, el campus estatus tiene dos opciones: activo o inactivo. Podemos hacer un Query con esto. Tambien podriamos utilizar no igual ( != ). Puedes usar los operadores relacionales tranquilamente.
 ```sql
 SELECT *
 FROM posts
 WHERE estatus = 'activo' ;
 ```
+
 
 ```sql
 SELECT *
@@ -1500,13 +1583,15 @@ WHERE estatus != 'activo' ;
 ```
 
 Utilizando LIKE % es un wildcard
-
+Por ejemplo, si no conocemos la cadena exacta podriamos utilizar los titulos por alguna caracteristica. El % implica 'lo que sea'. Por ejemplo, selecciona de los posts donde el titulo tenga lo que sea antes y despues de escandalo (parecido a escandalo) 
 ```sql
 -- todos los post con la palabra
 SELECT *
 FROM posts
 WHERE titulo LIKE '%escandalo%' ;
 ```
+
+Podriamos, por ejemplo, pedir los titulos que comiencen con la palabra escandalo
 
 ```sql
 -- todos los post que inicien con la palabra
@@ -1522,7 +1607,9 @@ FROM posts
 WHERE titulo LIKE '%roja' ;
 ```
 
-Usando WHERE con fechas
+**Usando WHERE con fechas**
+
+Con  las fechas podriamos jugar, por ejemplo, a consultar los posts que se hicieron antes o despues de cierto dia.
 
 ```sql
 SELECT *
@@ -1538,19 +1625,25 @@ WHERE fecha_publicacion < "2025-01-01";
 
 Usando BETWEEN para  definir un rangos
 
+Con esto podemos definir rangos para poder consultar informacion que se encuentre entre dos valores.
+
 ```sql
 SELECT *
 FROM posts
 WHERE fecha_publicacion BETWEEN "2025-01-01" AND "2025-12-31";
 ```
 
+Esto es valido para rangos de cualqueir tipo, no solamente fechas. Por ejemplo, filtremos los posts por ids
+
 ```sql
 SELECT *
 FROM posts
-WHERE id BETWEEN 5 AND 10;
+WHERE id BETWEEN 55 AND 62;
 ```
 
 Otros filtros con fechas
+
+Hasta ahora hemos estado trayendo la fecha completa. Sin embargo, podemos manipular esto un poco. Por ejemplo podemos usar solamente el año. Debido a que la informacion aqui es de tipo DATETIME, sql reconoce cual es el año.
 
 ```sql
 SELECT *
@@ -1566,7 +1659,7 @@ WHERE MONTH(fecha_publicacion) = "04";
 
 ### Clase 34 Utilizando la sentencia WHERE nulo y no nulo
 
-El valor nulo en una tabla generalmente es su valor por defecto cuando nadie le asignó algo diferente. La sintaxis para hacer búsquedas de datos nulos es **IS NULL**. La sintaxis para buscar datos que no son nulos es **IS NOT NULL**
+El valor nulo en una tabla generalmente es su valor por defecto cuando nadie le asignó algo diferente. La sintaxis para hacer búsquedas de datos nulos es **IS NULL**. La sintaxis para buscar datos que no son nulos es **IS NOT NULL** Podriamos considerar estos valores nulos y no nulos como un tipo de dato particular y forma parte de la sintaxis de SQL.
 
 Para posts sin usuario
 
@@ -1586,25 +1679,29 @@ WHERE usuario_id IS NOT NULL;
 ;
 ```
 
-Para posts con usuario y activo, el uso de AND agrega condiciones de tipo filtro como usar excel
+Para posts con usuario y activo, el uso de AND agrega condiciones de tipo filtro como usar excel. Por ejemplo, podriamos traer los usuarios no nulos pero que tengan estatus activo (y otros parametros)
 
 ```sql
 SELECT *
 FROM posts
 WHERE usuario_id IS NOT NULL
- AND estatus ='activo'
-    AND id < 20
+	AND estatus ='activo'
+    AND id < 50
     AND categoria_id = 2
- AND year(fecha_publicacion) = '2025'
+ 	AND YEAR(fecha_publicacion) = '2025'
 ;
 
 ```
 
 ### Clase 35 GROUP BY
 
-**GROUP BY** tiene que ver con agrupación. Indica a la base de datos qué criterios debe tener en cuenta para agrupar.
+**GROUP BY** tiene que ver con agrupación. Indica a la base de datos qué criterios debe tener en cuenta para agrupar. Por ejemplo, puedes agrupar registros por pais, o por año, por ejemplo.
 
 Gruop by te permite agrupar estilo pivot tables, e informes.
+
+En el siguiente ejemplo, vamos a seleccionar nuestra estatus de post, vamos a contar y agruparlos por estatus. De esta forma podremos obtener cuantos posts tenemos activos e inactivos. Entonces, nos agrupo nuestros posts activos e inactivos, los sumo y nos lo dio como resultado. Asi como podeos hacer COUNT() podriamos hacer SUM().
+
+En los trabajos suelen pedir cifras finales. En estos casos sirve mucho GROUP 
 
 ```sql
 SELECT estatus, COUNT(*) AS post_quantity
@@ -1615,6 +1712,8 @@ GROUP BY estatus
 
 Ejemplo 2 Agrupando por Año
 
+Vamos a agrupar todos los post por año y vamos a contarlos. Esta consulta nos dira cuantos posts se hicieron por año,
+
 ```sql
 SELECT YEAR(fecha_publicacion) AS post_year, COUNT(*) AS post_quantity
 FROM posts
@@ -1624,6 +1723,8 @@ GROUP BY post_year
 
 Ejemplo 3 Agrupando por Mes
 
+Esta vez no nos importa el año. Queremos saber por ejemplo cuantas publicaciones suelen hacerse por mes.
+
 ```sql
 SELECT MONTHNAME(fecha_publicacion) AS post_month, COUNT(*) AS post_quantity
 FROM posts
@@ -1632,6 +1733,8 @@ GROUP BY post_month
 ```
 
 Ejemplo 4 Agrupando por Mes y estatus
+
+En esta consulta vamos a obtener la cantidad de activos e inactivos de cada mes
 
 ```sql
 SELECT estatus, MONTHNAME(fecha_publicacion) AS post_month, COUNT(*) AS post_quantity
@@ -1644,13 +1747,19 @@ GROUP BY estatus, post_month
 
 La sentencia **ORDER BY** tiene que ver con el ordenamiento de los datos dependiendo de los criterios que quieras usar.
 
+Por ejemplo, puedes usar los sigueitnes criterios:
+
 - **ASC** sirve para ordenar de forma ascendente.
 - **DESC** sirve para ordenar de forma descendente.
 - **LIMIT** se usa para limitar la cantidad de resultados que arroja el query.
 - **HAVING** tiene una similitud muy grande con **WHERE**, sin embargo el uso de ellos depende del orden. Cuando se quiere seleccionar tuplas agrupadas únicamente se puede hacer con **HAVING**.
 
+
+Tenemos nuestros datos ordenados por defecto segun como los fuimos incluyendo a la tabla (por el id). Sin embargo, suponiendo que queremos ordenarlos de distinta manera podriamos aplicar los siguientes querys: 
+
 Ejemplo Order by ascendente default
 
+Por defecto podemos ordenarlo de manera ascendente sin hacerlo explicito.
 ```sql
 SELECT *
 FROM posts
@@ -1677,6 +1786,7 @@ ORDER BY fecha_publicacion DESC
 ```
 
 Ordenando con strings se toma el orden alfabetico.
+Podemos ordenar por string tanto de forma ascendente como descendente.
 
 ```sql
 SELECT *
@@ -1686,6 +1796,7 @@ ORDER BY titulo ASC
 ```
 
 Ejemplo Order by ascendente explicito y limite de 5 registros
+Esta sentencia puede ser un complemento. La sentencia LIMIT podriamos usarla para limitar los primeros 5 resultados, por ejemplo. Esto funciona si no quiero traer todos los posts. Al consultar ordenando por orden ascendente y con LIMIT podriamos tener los primeros 5 posts que se publicaron.
 
 ```sql
 SELECT *
@@ -1695,7 +1806,24 @@ LIMIT 5
 ;
 ```
 
-**HAVING** es similar a **WHERE** aunque no muy utilizada, pero es necesaria cuando quieres hacer un filtro con datos agrupados por un ORDER BY, **HAVING** siempre va despues del **GROUP BY**
+**HAVING** es similar a **WHERE** aunque no muy utilizada, pero es necesaria cuando quieres hacer un filtro con datos agrupados por un ORDER BY.
+ **HAVING** siempre va despues del **GROUP BY** cuando queremos hacer una consulta de seleccion de tuplas agrupados.
+
+ Es decir, si quisieramos ejecutar el siguiente script: 
+
+```sql
+SELECT MONTHNAME(fecha_publicacion) AS post_month, estatus, COUNT(*) AS post_quantity
+FROM posts
+WHERE post_quantity > 1
+GROUP BY estatus, post_month
+ORDER BY post_month
+;
+```
+Tendriamos problemas. Nos daría un error. En esta consulta la intencion seria contar los posts de cada mes segun su estatus (post activos e inactivos de enero, por ejemplo). Ordenarlos segun su estatos y el mes de manera ascendente por defecto.
+
+Sin embargo, al ejecutarse vemos que nos dice que no conoce la columna post_quantity. Esto es porque esta columna existirá luego de haber hecho la agrupacion. El where al consultarla antes no sabe que existe. Para estos casos podemos usar HAVING para decir que queremos agruparlos pero solamente los meses con mas de un post.
+
+ Por ejemplo,
 
 ```sql
 SELECT MONTHNAME(fecha_publicacion) AS post_month, estatus, COUNT(*) AS post_quantity
@@ -1706,6 +1834,11 @@ ORDER BY post_month
 ;
 ```
 
+HAVING y WHERE tienen muchas similitudes y con sintaxis similar pero nos ayuda cuando queremos hacer consultas mas dinamicas.
+
+
+Ya en este punto tenemos todas las herramientas para hacer querys complejos. 
+
 ### Clase 37 El interminable agujero de conejo (Nested queries)
 
 Los **Nested queries** significan que dentro de un query podemos hacer otro query. Esto sirve para hacer join de tablas, estando una en memoria. También teniendo un query como condicional del otro.
@@ -1713,7 +1846,10 @@ Los **Nested queries** significan que dentro de un query podemos hacer otro quer
 Este proceso puede ser tan profundo como quieras, teniendo infinitos queries anidados.
 Se le conoce como un *producto cartesiano* ya que se multiplican todos los registros de una tabla con todos los del nuevo query. Esto provoca que el query sea difícil de procesar por lo pesado que puede resultar, y se considera como no escalable.
 
+Debemos utilizarlo en Querys que sepamos que no van a estar creciendo constantemente.
+
 Ejemplo 1
+En este ejemplo estamos seleccionando una tabla que aun no existe si no que es resultado de un query. Luego, eso estara agrupado y ordenado
 
 ```sql
 SELECT new_table_projection.date, COUNT(*) AS posts_count
@@ -1728,6 +1864,8 @@ ORDER BY new_table_projection.date
 
 Ejemplo 2
 
+Esta vez haremos un ejemplo pero tomando una fecha MAX.
+
 ```sql
 SELECT *
 FROM posts
@@ -1739,18 +1877,30 @@ FROM posts
 
 ### Clase 38 Como convertir una pregunta en un query SQL
 
+Esto no siempre es una transformacion directa. Muchas de las sutilezas se van adquiriendo al ir enfrentandose a retos segun se vayan presentando. Por eso es importante tener proyectos personales de temas que te interesen para ir tomando temas y responder preguntas.
+
+Veremos a que equivale aproximadamente cada sentencia del Query
+
 #### De pregunta a Query
 
-**SELECT:** Lo que quieres mostrar
-**FROM:** De dónde voy a tomar los datos (tablas unicas o con joins)
-**WHERE:** Los filtros de los datos que quieres mostrar
-**GROUP BY:** Los rubros por los que me interesa agrupar la información
-**ORDER BY:** El orden en que quiero presentar mi información
-**HAVING:** Los filtros que quiero que mis datos agrupados tengan
+- **SELECT:** Lo que quieres mostrar. En cuanto a qué datos y que informacion nos conviene presentar al usuario.
+
+- **FROM:** De dónde voy a tomar los datos (tablas unicas o con joins). 
+
+- **WHERE:** Los filtros de los datos que quieres mostrar. No quiero toda la informacion, solo cierta informacion relevante y por eso debo aplicar algunos grupos.
+
+- **GROUP BY:** Los rubros por los que me interesa agrupar la información. Por cuales grupos quiero seleccionar la informacion? por nombre de equipo, por torneo, por caratula, reloj digital o analogico, por cualquier campo que nos interese mostrar o para sacar conteos o sumas.
+
+- **ORDER BY:** El orden en que quiero presentar mi información. Me interesa ordenarlos por las fechas? Mostrar los 10 primeros? hay algun top que me interese mostrar?
+
+- **HAVING:** Los filtros que quiero que mis datos agrupados tengan. Quiero filtrar nuevamente pero una vez que ya los tengo agrupados, que ya sume, por ejemplo.
 
 
 
 ### Clase 39 Preguntandole a la base de datos
+
+Tomemos algunas preguntas para hacerle a nuestras bases de datos con la estructura que ya hemos trabajado.
+
 
 **GROUP_CONCAT** toma el resultado del query y lo pone como campo separado por comas.
 
@@ -1760,7 +1910,7 @@ Criterios.
 **ORDER BY:** Sirve para decidir el orden de concatenación del campo.
 **:** Es el separador a utilizar para separar los valores (por defecto, el separador es una coma “,”).
 
-Preguna 1 Cuantas etiquetas estan ligadas a los blogposts
+**Preguna 1 Cuantas etiquetas estan ligadas a los blogposts**
 
 ```sql
 SELECT posts.titulo, COUNT(*) num_etiquetas
@@ -1772,7 +1922,7 @@ ORDER BY num_etiquetas DESC
 ;
 ```
 
-Usando GROUP_CONCAT para tener campos separados por comas
+Usando GROUP_CONCAT para tener campos separados por comas. Por ejemplo podemos tener el nombre del posts y las etiquetas separadas por comas que le corresponden
 
 ```sql
 SELECT posts.titulo, GROUP_CONCAT(nombre_etiqueta)
@@ -1785,7 +1935,7 @@ GROUP BY posts.id
 
 ![GROUP_CONCAT](src/GROUP_CONCAT.png)
 
-Saber que posts no tienen etiquetas
+Si ahora queremos saber que posts no tienen etiquetas podriamos aplicar el siguiente Query:
 
 ```sql
 SELECT *
@@ -1794,6 +1944,8 @@ FROM etiquetas
 WHERE posts_etiquetas.etiqueta_id IS NULL
 ;
 ```
+
+Tambien podriamos hacer una variante para consultar cual etiqueta aun no tiene post.
 
 ### Clase 40 Consultando PlatziBlog
 
@@ -1853,21 +2005,28 @@ Respecto a las bases de datos no relacionales, no existe un solo tipo aunque se 
 
 #### Tipos de bases de datos no relacionales:
 
-- **Clave - valor:** Son ideales para almacenar y extraer datos con una clave única. Manejan los diccionarios de manera excepcional. Ejemplos: **DynamoDB, Cassandra**.
-- **Basadas en documentos:** Son una implementación de clave valor que varía en la forma semiestructurada en que se trata la información. Ideal para almacenar datos JSON y XML. Ejemplos: **MongoDB, Firestore**.
-- **Basadas en grafos:** Basadas en teoría de grafos, sirven para entidades que se encuentran interconectadas por múltiples relaciones. Ideales para almacenar relaciones complejas. Ejemplos: **neo4j, TITAN**.
-- **En memoria:** Pueden ser de estructura variada, pero su ventaja radica en la velocidad, ya que al vivir en memoria la extracción de datos es casi inmediata. Ejemplos: **Memcached, Redis**.
-- **Optimizadas para búsquedas:** Pueden ser de diversas estructuras, su ventaja radica en que se pueden hacer queries y búsquedas complejas de manera sencilla. Ejemplos: **BigQuery, Elasticsearch**.
+- **Clave - valor:** Son ideales para almacenar y extraer datos con una clave única. Manejan los diccionarios de manera excepcional. Ejemplos: **DynamoDB, Cassandra**. Es muy rapido hacer consultas porque utilizan una busqueda por Hash pero es necesario tener las claves. Hacer queries mas complicados puede traer ciertos problemas. 
+- **Basadas en documentos:** Son una implementación de clave valor que varía en la forma semiestructurada en que se trata la información. Ideal para almacenar datos JSON y XML. Ejemplos: **MongoDB, Firestore**. Por ejemplo, podrias utilizarlo para almacenar la imagen viva de una aplicacion web y extraerla rapidamente (por ejemplo, el estado de un jugador en cierto juego.)
+- **Basadas en grafos:** Basadas en teoría de grafos, sirven para entidades que se encuentran interconectadas por múltiples relaciones. Ideales para almacenar relaciones complejas. Ejemplos: **neo4j, TITAN**. Es muy utilizada para hacer redes neuronales por las relaciones complejas que pueden existir. Podria hacerse la analogia a las entidades y sus relaciones pero a otro nivel, muchas veces todas conectadas entre todas.
+- **En memoria:** Pueden ser de estructura variada, pero su ventaja radica en la velocidad, ya que al vivir en memoria la extracción de datos es casi inmediata. Ejemplos: **Memcached, Redis**. Sin embargo, son volatiles. Si las manejas en un servidor y este se reinicia probablemente tengas que indexar de nuevo. Hay que trabajar en ir almacenando la informacion en memoria de mas duracion (De memoria principal a disco duro)
+- **Optimizadas para búsquedas:** Pueden ser de diversas estructuras, su ventaja radica en que se pueden hacer queries y búsquedas complejas de manera sencilla. Ejemplos: **BigQuery, Elasticsearch**. Estan pensadas para hacer Queries muy rapidos. Se utilizan mucho en BussinessIntelligence. Incluso en modelos de machine learning
 
-Cada base de datos de este tipo soluciona un problema en particular, pero es mala para todo lo demas dada la gran cantidad de datos.
+Cada base de datos de este tipo surgen para responder a problemas en los que las bases de datos relacionales podian presentar fallos. Sin embargo, puedes aplicar las bases de datos relacionales a multiples problemas. Estas bases no relacionales tienen funciones más especificas pero resuelven de forma excelenete los problemas para los que estan diseñadas.
 
 ### Clase 42 Servicios administrados y jerarquía de datos
 
-**Firebase** es un servicio de Google donde puedes tercerizar muchos elementos en la nube.
+**Firebase** es un servicio de Google donde puedes tercerizar muchos elementos en la nube. Es muy útil para mantener el estado de una aplicacion web o android, por ejemplo. 
+
+
+Un aspecto importante es que ya en este tipo de bases de datos cambia la jerarquía. No funciona con tablas como la relacionales.
+
 **Jerarquía de datos**:
 
+
 **1. Base de Datos:** Contiene toda la información que se quiere guardar.
+
 **2. Colección:** Es igual a las tablas en las bases de datos relacionales. Son objetos que agrupan (Documentos) la información que se desea guardar.
+
 **3. Documento:** Es la información que se quiere guardar. Se guarda en un formato muy parecido al formato JSON (es un lenguaje que se utiliza para comunicarse con diferentes lenguajes o aplicaciones). Los documentos dentro de ellos contienen datos.
 
 ![jerarquia_firestore](src/jerarquia_firestore.png)
