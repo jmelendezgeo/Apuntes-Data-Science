@@ -19,5 +19,5 @@ Incluyen contenido de plataformas como Platzi, Coursera y EdX
 * Introduction to Data Science
 
 **EdX**
-* Usign Python for Research - HarvardX
+* Using Python for Research - HarvardX
 * Fundamentos y construccion de modelos de prediccion con Machine Learning - Anahuac Online 
