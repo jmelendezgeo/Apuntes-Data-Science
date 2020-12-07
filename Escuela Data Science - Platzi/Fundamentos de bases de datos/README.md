@@ -3,6 +3,8 @@
 
 # Fundamentos de Bases de Datos
 
+El contenido de este documento esta basado en el curso del mismo nombre dictado por Javier Morales en [Platzi](https://platzi.com/r/jrmelendezm_/).
+
 ## Indice
 
 - [Fundamentos de Bases de Datos](#fundamentos-de-bases-de-datos)
