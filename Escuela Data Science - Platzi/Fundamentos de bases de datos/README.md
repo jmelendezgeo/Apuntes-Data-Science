@@ -4,6 +4,7 @@
 # Fundamentos de Bases de Datos
 
 El contenido de este documento esta basado en el curso del mismo nombre dictado por Javier Morales en [Platzi](https://platzi.com/r/jrmelendezm_/).
+Estas notas son un Fork a partir de las notas de [Rusbel Bermudez](https://github.com/rb-one)
 
 ## Indice
 
