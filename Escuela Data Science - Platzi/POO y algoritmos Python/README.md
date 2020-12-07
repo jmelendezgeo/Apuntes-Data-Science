@@ -8,7 +8,7 @@
 
 # Introducción al documento
 
-El contenido de este documento esta basado en el curso del mismo nombre dictado por [David Aroesti](https://github.com/jdaroesti) en [Platzi](https://platzi.com/r/karlbehrens/).
+El contenido de este documento esta basado en el curso del mismo nombre dictado por [David Aroesti](https://github.com/jdaroesti) en [Platzi](https://platzi.com/r/jrmelendezm_/). Estas notas son un Fork a partir de las notas de [Karl Behrensg](https://github.com/karlbehrensg)
 
 # Tabla de contenido
 - [Programación Orientada a Objetos](#Programación-Orientada-a-Objetos)
