@@ -2040,10 +2040,13 @@ Un aspecto importante es que ya en este tipo de bases de datos cambia la jerarqu
 
 El modelo de bases de datos no relacionales es un poco más cercano al mundo real en su comportamiento.
 
-- Las top level collections son las colecciones que se tienen de inmediato o entrada en el proyecto.
+- Las top level collections son las colecciones que se tienen de inmediato o entrada en el proyecto. A nivel de "raiz". Puedes crear una coleccion, que tendra ciertos documentos.
 - **Firebase** es un servicio que tiene múltiples opciones y está pensado principalmente para aplicaciones móviles y web.
 
 Para esta clase creamos una bd en firebase <https://console.firebase.google.com/u/0/?pli=1>
+
+Para consultar la documentacion oficial podemos ir a: 
+https://firebase.google.com/docs
 
 Seguimos  los pasos sencillos de la pagina para crear nuestra base de datos "platziblog"
 
@@ -2069,14 +2072,26 @@ Para crear una Top level collection (las que estan a nivel de la ruta principal)
 
 ### Clase 44 Creando y borrando documentos en Firestore
 
-Jugamos con la interface observamos los tipos de datos:
+Jugamos con la interface observamos los tipos de datos que podemos crear en los documentos:
 
-- **string:** (absorve text,  varchar, etc)
-- **number:** (int,float)
-- **Map:** permite hacer un arreglo dentro  de otro arreglo (inception)
-- **Timestamp:** para datos de tiempo
-- **Geopoint** latitud y longitud.
-- **Reference:**, hace referencia a otro documento o coleccion
+    - String: Cualquier tipo de valor alfanumérico
+
+    - Number: Soporta enteros y flotantes.
+
+    - Boolenan: Los clásicos valores True y False
+
+    - Map: Permite agregar un documento dentro de otro.
+
+    - Array: Permite agregar un conjunto de datos (soporte multi type) sin nombre e identificador.
+
+    - Null: Indica que no se ha definido un valor.
+
+    - Timestamp: Permite almacenar fechas (guarda el año, mes, día y hora).
+
+    - Geopoint: Guarda una localización geográfica (coordenadas latitud-longitud).
+
+    - Reference: Permite referencia un documento (relaciona dos documentos, no importa su colección).
+
 
 Ejemplos
 
@@ -2088,9 +2103,15 @@ Ejemplos
 
 ![firebase_tipos_datos_4](src/firebase_tipos_datos_4.png)
 
+
+
+Las bases de datos no relacionales presentan una ventaja respecto a las relacionales. En las relacionales es necesario esquematizar y pensar en las entidades y sus relaciones. Aquí vemos, por ejemplo, que firestone nos permite crear documentos sin esa rigidez. Podriamos crear un post con fecha de publicacion y otro sin fecha de publicacion. Sin embargo, esa flexibilidad puede traer como consecuencia que, al momento de realizar una consulta y pedir que ordene los posts por fecha de publicacion, pueden haber documentos que no tengan los campos requeridos.
+
+Es cuestión de plantearse las necesitades del proyecto.
+
 ### Clase 45 Colecciones vs subcolecciones
 
-La particularidad de las top level collections es que existen en el primer nivel de manera intrínseca. Las subcolecciones ya no vivirán al inicio de la base de datos.
+La particularidad de las top level collections es que existen en el primer nivel de manera intrínseca. Las subcolecciones ya no vivirán al inicio de la base de datos. Cuando creamos una colección y accedemos a sus documentos vemos que tienen la opcion de crear coleccion dentro del documento. Estas subcolecciones no se pueden ver si no se accede al documento de la coleccion.
 
 Si tienes una entidad separada que vas a referenciar desde muchos lugares es recomendado usar un top level collection. Por el otro lado si se necesita hacer algo intrínseco al documento es aconsejable usar subcolecciones.
 
@@ -2108,6 +2129,21 @@ Creamos la coleccion posts
 
 ![colecciones_vs_subcolecciones_6](src/colecciones_vs_subcolecciones_6.png)
 
+
+Aquí lo que tenemos es una coleccion post, que tiene un documento y ese documento tiene una coleccion intrinseca. Al acceder a esa subcoleccion vemos que nos meustra los detalles de otros documentos (como las etiquetas)
+
+
+Las buenas practicas sugieren que, si vas a ocupar los elementos de la coleccion de manera independiente, hacer queries separados, o varios objetos o documentos diferentes tendran referencia a esa coleccion, vale la pena tener la entindad en top level colection. Por otro lado, si tendremos elementos que nos interesen solamente en el contexto de nuestro articulo o nuestro blogpost, vale la pena guardarla como subcoleccion de esa noticia en particular
+
+
+Un top level collection se utilizaria para relaciones de tipo “agregacion”. Mientras que una sub collection se utilizaria para relaciones tipo “composicion”.
+
+Por ejemplo:
+
+Tenemos Estudiantes, Cursos y Notas. Los estudiantes tiene cursos y los cursos tiene estudiantes. Si se elimina un curso los estudiantes no deben ser eliminados. Lo mismo si se elimina un estudiante los cursos no deben ser elimiandos. Esto es una relacion de agregacion. Aqui se usaria top level collection para estudiantes y cursos.
+
+Los estudiantes tienen notas y las notas pertenecen a un estudiante. Si se elimina un estudiante, tiene sentido eliminar las notas. Esto es una relacion de composicion. Aqui se usarian las subcollections. El estudiante tendría una subcollection de notas.
+
 ### Clase 46 Recreando Platziblog
 
 Firestore, es una base de datos basada en documentos, pensada en lo siguiente:
@@ -2116,7 +2152,21 @@ Mantener el estado de tu aplicación.
 En como se verán reflejados los datos en el frontend para el usuario.
 Podemos hacer consultas sencillas en base a las top level collecttion. Ahora si queremos hacer consultas mas complejas podríamos usar big query, que es un data wharehouse.
 
+
+En firestore hay algunas excepciones y detalles respecto a nuestra base de datos relacional. Por ejemplo, no existen tablas transistivas y tampoco un autoincremento (eso lo maneja Google). Pero, en general, debemos ser capaces de tener la misma data que tenemos en nuestra base de datos relacional en nuestra base de datos de firestore. 
+
+El primer paso para hacerlo es ir a nuestro diagrama físico para ir partiendo nuestro proyecto. Debemos preguntarnos cuales entidades deberian ser una top level collection y cuales deberian ser documentos.
+
+No hay una sola respuesta, depende de los usos que quieras darle. Depende, en la planeación, como vas a consultarlo. Por ejemplo si vamos a pensar en hacer consultas del usuario para mostrarlo como algo independiente entonces no tiene sentido ponerlo como un documento. No tendría sentido entrar a cada post a revisar las listas de usuarios a cada momento. 
+
+Si por el contrario, no se necesita hacer una lista de usuarios para consultas, entonces si vale la pena tenerlos dentro de los documentos. En este momento haremos este enfoque, haremos los usuarios dentro de los posts y los posts entonces que indiquen que usuario los creo.
+
+En las bases de datos pensadas el documentos el enfoque es distinto. Estas bases de datos no estan pensadas para hacer queries y relacionar información sino que estan pensadas para mantener el estado actual de una aplicación. Por ejemplo, en una llamada del post que se muestre toda la información pertinenente como las etiquetas, las catergorias, los comentarios y el usuario que la creo. Por ello, al momento de usar una base de datos no relacional, debe considerarse cual es el uso que le vamos a dar y elegir la herramienta que mejor se adapte.
+
 ### Clase 47 Construyendo Platziblog en Firestore
+
+
+Hay muchos esquemas que podemos tratar. En este caso, vamos a elegir hacer las categorias, los usuarios y los posts como top level collections para poder hacer consultas sobre ellos.
 
 Construimos categorias "espectaculos","deportes" y "ciencia" como top level collection
 
@@ -2128,27 +2178,35 @@ Creamosen top level la coleccion usuarios
 
 ![Platziblog_firebase_3](src/Platziblog_firebase_3.png)
 
-Creamos la top level posts con dos articulos
+Creamos la top level posts con dos articulos. Esto lo hacemos para mostrar que podemos almacenar toda la informacion que teniamos en nuestra base de datos relacional sin problemas.
 
 ![Platziblog_firebase_4](src/Platziblog_firebase_4.png)
 
 ![Platziblog_firebase_5](src/Platziblog_firebase_5.png)
 
-Ahora hacemos la relacion del top level collection del usuario /usuarios/qK7F62sQY8bKI8o9w5RY agregando un campo en un documento posts usando el campo reference agregando el usuario
+
+Aunque aqui no tenemos las relaciones, podemos usar la referencia. Como cada post es publicado por un usuario (vemos que hay una relacion clara entre post-usuarios), podemos agarrar la referencia de la coleccion y añadirla en los campos de los documentos (como un campo author) de tipo referencia
+
+Ahora hacemos la relacion del top level collection del usuario (Forma /usuarios/SaadnSqxKP0oI) agregando un campo en un documento posts usando el campo reference agregando el usuario
 
 ![Platziblog_firebase_6](src/Platziblog_firebase_6.png)
 
 ![Platziblog_firebase_7](src/Platziblog_firebase_7.png)
 
-Agregamos las referencias para las categorias
+Igualmente vamos a hacer una referencia a las categorias. Por ejemplo, un post que sea de Ciencias y el otro post que sea de Deportes.
 
 ![Platziblog_firebase_8](src/Platziblog_firebase_8.png)
 
 ![Platziblog_firebase_9](src/Platziblog_firebase_9.png)
 
-Finalmente agregamos las subcolecciones etiquetas a los posts en agregar coleccion
+Finalmente agregamos las etiquetas de cada post como subcolecciones.
 
 ![Platziblog_firebase_10](src/Platziblog_firebase_10.png)
+
+
+
+Aunque vemos que el enfoque es distinto, de igual modo estamos guardando la misma informacion y las relaciones. Al entrar a un post podemos saber sus propiedades, a que categoria pertenece, que usuario lo publicó, si se encuentra activo o inactivo, etc.
+
 
 ### Clase 48 Proyecto final: transformando tu proyecto en una db no relacional
 
@@ -2188,58 +2246,74 @@ Experimenta aplicando estas dos reglas a un proyecto que ya conozcas en una base
 
 ### Clase 49 Bases de datos en la vida real
 
-Para datos historicos, queries complejos usar bigquery optimizado para datawherehouse
+Durante mucho tiempo se utilizaron las bases de datos relacionales para todo. Lo hizo muy bien por un tiempo, tanto así que Facebook utilizaba MySql. Este paradigma se rompe en el momento en que las aplicaciones que utilizamos se masifican (Big Data). Esto fue una exigencia mayor a las bases de datos. Al usar estas bases de datos cuando se llegaba a tal punto empezaban a tener problemas procesando los datos y el uso particular de datos.
 
-Para datos del estado de nuestra aplicacion usa colecciones con mongo o firebase.
+Ahora tenemos diversos tipos de bases de datos dependiendo de la necesidad que quieres atacar.
 
-Puedes usar dos bases de datos en un mismo proyecto, guardar datos de mongo, convertirlos pasarlos a bigquery y hacer analisis sobre ellos.
+Para datos historicos, queries complejos usar bigquery optimizado para datawherehouse. 
+
+Para datos del estado de nuestra aplicacion usa colecciones con mongodb o firebase. Nos ayuda a tener los datos que viven actualmente en la aplicacion. Nos permite guardar y extraer los datos de manera completa pero no nos pide hacer Queries muy complejos.
+
+Incluso puedes usar dos bases de datos en un mismo proyecto, guardar datos de mongo, convertirlos pasarlos a bigquery y hacer analisis sobre ellos. Podrias usar Firestore, transformarlos y pasarlos a BigQuery y meter incluso elementos de machinelearning. 
 
 ### Clase 50 Big Data
 
 **Big Data** es un concepto que nace de la necesidad de manejar grandes cantidades de datos. La tendencia comenzó con compañías como **YouTube** al tener la necesidad de guardar y consultar mucha información de manera rápida.
 
-Es un gran movimiento que consiste en el uso de diferentes tipos de bases de datos.
+Es un gran movimiento que consiste en el uso de diferentes tipos de bases de datos. En youtube se guardas miles de horas de videos por segundo. Hay que manejar grandes cantidades de informacion en muy poco tiempo y de manera eficiente.
 
-Un ejemplo  es cassandra pero tiene ciertos tipos de desventaja, su ventaja manejar datos masivos a gran velocidad
+Ejemplos: Cassandra. Nace de la necesidad de Facebook de guardar y sacar mucha información por segundo. Tiene desventajas como que las llaves ya estan definidas, problemas para hacer ciertos Joins, desventajas que no la hacen tan flexible. Pero, para sacar y meter datos de manera rapida, es muy efectiva.
 
 ### Clase 51 Data warehouse
 
 **Data Warehouse** trata de guardar cantidades masivas de datos para la posteridad. Allí se guarda todo lo que no está viviendo en la aplicación pero es necesario tenerlo.
-Debe servir para guardar datos por un largo periodo de tiempo y estos datos se deben poder usar para poder encontrar cuestiones interesantes para el negocio.
+Debe servir para guardar datos por un largo periodo de tiempo y estos datos se deben poderse usar para encontrar cuestiones interesantes para el negocio. Un modo claro sería guardar los posts de facebook o de twitter; todo esto a pesar de que entra por segundo, el histórico no se usa en el momento actual de la aplicación pero es información relevante que es bueno guardar en otro lado (en un DataWarehouse).
+Toda la información de Facebook y Youtube desde sus inicios se guarda en un gran almacen de datos.
 
-Google usa **BigTable**, usa una sola tabla, pero no sirve tanto para hacer consultas
+Google usa **BigTable**. BigTable usa una sola tabla; Una gran tabla con mucha información. No sirve tanto para hacer consultas.
 
 **Data Warehouse** es un archivo historico, archivo muerto, en  otra base de datos. Sirve para dos actividades principales:
 
 - Guarda una gran cantidad de datos de forma "eterna".
 - Poder extraer los datos para hacer analitica.
 
-BigQuery es muy utilizado
+BigQuery es muy utilizado para almacenar una gran cantidad de datos pero tambien permite hacer consultas y meterle datos de distintas bases de datos.
 
 ### Clase 52 Data mining
 
 El **Data Mining** se dedica a minar datos, a extraerlos de donde sea que estén (archivos muertos, base de datos actual, etc…) y hacer sentido de ellos para darles un uso.
+
+Incluso de volver a guardar los datos pero hacerlos de forma aprovechable (Hay muchos datos en brutos de empresa que estan aislados, bases de datos que no estan normalizada, etc). Surge al mismo tiempo que el DataWarehouse y BusinessIntelligence; eran conceptos que estaban ligados.
 
 ### Clase 53 ETL
 
 **ETL** son las siglas de Extract, Transform, Load (extraer, transformar y cargar). Se trata de tomar datos de archivos muertos y convertirlos en algo que sea de utilidad para el negocio.
 También ayuda a tomar los datos vivos de la aplicación, transformarlos y guardarlos en un data warehouse periódicamente.
 
+En Data mining ya vemos que muchas empresas pueden tener la información de forma no coherente. ETL significa tomar datos de un lugar, aplicarle procesos de transformacion, limpieza, procesamiento y cargarlos en otro lado.
+
+Es una gran herramienta; podemos tomar la información viva de una aplicacion (o de un juego) y transformarla para almacenarla de una forma mas aprovechable. 
+
 ### Clase 54 Business intelligence
 
 **Business Intelligence** es una parte muy importante de las carreras de datos ya que es el punto final del manejo de estos. Su razón de ser es tener la información lista, clara y que tenga todos los elementos para tomar decisiones en una empresa.
-Es necesario tener una buena sensibilidad por entender el negocio, sus necesidades y la información que puede llevar a tomar decisiones en el momento adecuado al momento de realizar business intelligence.
+Es necesario tener una buena sensibilidad por entender el negocio, sus necesidades y la información que puede llevar a tomar decisiones en el momento adecuado al momento de realizar business intelligence. Consiste en evaluar patrones, la segmentacion de los clientes, sus preferencais, comportamientos históricos, mejores meses, etc.
 
 ### Clase 55 Machine Learning
 
 **Machine Learning** tiene significados que varían. Es una serie de técnicas que involucran la inteligencia artificial y la detección de patrones.
 Machine learning para datos tiene un gran campo de acción y es un paso más allá del business intelligence.
-Nos ayuda a hacer modelos que encuentran patrones fortuitos encontrando correlaciones inesperadas.
+Nos ayuda a hacer modelos que encuentran patrones fortuitos para hacer correlaciones inesperadas. Sirve para ayudar a la toma de decisiones oportunas en cualquier ambito (organizaciones,empresas,gobiernos).
+
+En BI tienes tienes a una persona buscando patrones; en ML no se intenta ir por un patron, se van por patrones fortuitos. Agarrar el mar de datos, aplicar un modelo que de conclusiones.
+
+
+
 
 **Tiene dos casos de uso particulares:**
 
-- Clasificación
-- Predicción
+- Clasificación: Relacionado con un pool de datos, por ejemplo una cantidad masiva de blogpost. Podria servir para clasificar por procesamiento de lenguaje natural y reconocer patrones para clasificar los temas.
+- Predicción: Por ejemplo, quieres analizar donde compran mas, patrones de ventas. Relaciones que quiza en un principio no te imaginas
 
 ### Clase 56 Data Science
 
