@@ -77,10 +77,6 @@ Por lo tanto, vemos que el tiempo requerido por nuestro algoritmo va a depender 
 
 Tenemos que el analisis de nuestro algoritmo en una **búsqueda exitosa** será: 
 
-![Algorithms1.1_s1](src/algth1_1.png)
-
-En el caso de no tener una busqueda exitosa, es decir, no se consigue el elemento _e_ en nuestro arreglo, tendremos que: 
-
 ~~~
       i=0        i<size         i++        S[i]==num      found=true      break
        1    +    1*(n)   +   1*(n-1)   +   (2*n)       +       1       +    1    
@@ -89,9 +85,19 @@ En el caso de no tener una busqueda exitosa, es decir, no se consigue el element
 
 ~~~
 
+En el caso de no tener una busqueda exitosa, es decir, no se consigue el elemento _e_ en nuestro arreglo, tendremos que: 
+
+
+![Algorithms1.1_s1](src/algth1_2.png)
+
+
 
 Entonces aquí la comparacion es entre 4 veces n+5 y 4 veces N+2. Entonces como se computa esto? Como obtendremos un promedio y que significa el promedio en este contexto?. Vamos a medir un promedio a traves de todos los posibles valores de un numero (el elemento e) mientras mantenemos la longitud del arrelo fija. Aquí vemos que en realidad no tiene sentido buscar por un gráfico tiempo vs numero; lo que tiene signficado es la busqueda tiempo vs lenght[S], cambiando la longitud y el promedio de todos los valores. Aquí esperamos ver resultados empiricos pero anticipandonos analiticamente
 
+
+Ejemplo de formulas matematicas: test
+
+$\mu, \beta, \lambda, \sigma, \Sigma$
 
 
 
