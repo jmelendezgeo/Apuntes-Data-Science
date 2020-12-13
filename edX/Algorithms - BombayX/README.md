@@ -1,12 +1,19 @@
 ## Indice
 
 - [Topic 1: Complexity](#topic-1-complexity)
+
 	-[Session 1: Running time of Program: Empirical and analytical method](#session-1-running-time-of-program-empirical-and-analytical-method)
+
 		-[Empirical Analysis of Running Time](#empirical-analysis-of-running-time)
+
 		-[Model for Algorithm Analysis](#model-for-algorithm-analysis)
+
 	-[Session 2: Running time of Program: Average and Worst Case Complexity. Asymtotic analysis](#session-2-running-time-of-program-)
+		
 		-[Search Algorithm A](#search-algorithm-a)
+		
 		-[Search Algorithm B](#search-algorithm-b)
+		
 		-[Recursion vs Iterative](#recursion-vs-iterative)
 
 	-[Session 3: Order of running time of an algorithm. Big-oh, Small-oh, Omega and theta](#session-3-order-of-running-time-of-an-algorithm-big-oh-small-oh-omega-and-theta)
@@ -134,7 +141,7 @@ Aqui vemos cual seria la probabilidad (tomando las expresiones que ya vimos para
 Veamos el siguiente script para ilustrar como funciona la busqueda binaria:
 
 
-´´´
+~~~
 bsearch(vector<int> &S, int num , int begin, int end ){
 	int mid;
 	mid = (begin + end)/2;
@@ -153,7 +160,7 @@ bsearch(vector<int> &S, int num , int begin, int end ){
 	}
 }
 
-´´´
+~~~
 
 Vemos que este algoritmo agarra un inicio, final y computa un medio. Si la lista S es una secuencia ordenada, se para en el medio y pregunta si el numero objetivo está en el extremo superior (> S[mid]) o en el extremo inferior (< S[mid]). Esto continúa hasta hallar el numero.
 
