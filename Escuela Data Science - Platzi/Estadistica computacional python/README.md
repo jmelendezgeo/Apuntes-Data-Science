@@ -8,7 +8,7 @@
 
 # Introducción al documento
 
-El contenido de este documento esta basado en el curso del mismo nombre dictado por [David Aroesti](https://github.com/jdaroesti) en [Platzi](https://platzi.com/r/karlbehrens/).
+El contenido de este documento esta basado en el curso del mismo nombre dictado por [David Aroesti](https://github.com/jdaroesti) en [Platzi](https://platzi.com/r/karlbehrens/). Estas notas son a partir de un fork a las notas de [Karl Behrens](https://github.com/karlbehrensg)
 
 # Tabla de contenido
 - [Objetivos](#Objetivos)
@@ -391,21 +391,21 @@ Al hablar de **probabilidad** preguntamos qué fracción de todos los posibles e
 - Ley del complemento:
     - P(A) + P(~A) = 1
 
-- Ley multiplicativa:
+- Ley multiplicativa: (Válido cuando los dos eventos son independientes)
     - P(A y B) = P(A) * P(B)
 
-- Ley aditiva:
+- Ley aditiva: (Podeos entenderla como un o)
     - Mutuamente exclusivos: P(A o B) = P(A) + P(B)
 
     - No exclusivos: P(A o B) = P(A) + P(B) - P(A y B)
     
-
+La probabilidad de la ley aditiva requiere evaluar si el evento es exclusivo o no.
 
 Para ver un ejemplo práctico de las leyes anteriores vamos a realizar un ejercicio de el lanzamiento de un dado de 6 caras:
 
 - La probabilidad de que salga el número **1**:
     
-    Tenemos **6** posibilidades y el número **1** es una de ellas, por lo que la probabilidad es **1/6**.
+    Tenemos **6** posibilidades (las 6 caras del dado) y el número **1** es una de ellas, por lo que la probabilidad es **1/6**.
 
 - La probabilidad de que nos toque el numero **1 o 2:**
 
@@ -423,9 +423,13 @@ Para ver un ejemplo práctico de las leyes anteriores vamos a realizar un ejerci
 
     `(1/6)^10 = 0.8333`
 
+Hay que notar cuando estamos usando Y (una opcion y la otra, ley de la multiplicacion) y un O (una opcion o la otra, ley aditiva)
+
 ## Simulación de Probabilidades
 
 En el siguiente ejercicio crearemos un ejemplo de lanzar un dado de 6 caras, esto con el objetivo de obtener la distribución de probabilidades y acercarnos al numero correcto, aplicando la **ley de los grandes números.**
+
+Esta ley nos dice que mientras más veces corremos la simulación, nos acercaremos más a la respuesta correcta. Mientras más muestras saquemos de una poblacición, estaremos acercandonos a los valores reales.
 
 ```py
 import random
@@ -466,13 +470,16 @@ if __name__ == '__main__':
 
 Con las simulaciones podemos calcular las probabilidades de eventos complejos sabiendo las probabilidades de eventos simples.
 
-¿Que pasa cuando no sabemos las probabilidades de los eventos simples? Las técnicas de la **inferencia estadística** nos permiten inferir/concluir las propiedades de una población a partir de una muestra **aleatoria.**
-
+¿Que pasa cuando no sabemos las probabilidades de los eventos simples? Las técnicas de la **inferencia estadística** nos permiten inferir/concluir las propiedades de una población a partir de una muestra **aleatoria.**. 
 _"El principio guía de la **inferencia estadística** es que una muestra aleatoria tiende a exhibir las mismas propiedades que la población de la cual fue extraída."_ - John Guttag
 
 <div align="center"> 
   <img src="readme_img/poblacion-muestra.jpeg" width="40%">
 </div>
+
+
+Nosotros tenemos una población objetivo, de esta población sacamos una muestra representativa y **aleatoria**. Luego, con esa muestra es posible generar conclusiones sobre la población en general. Esto funciona por un teorema de la estadística:
+
 
 ### Ley de los grandes números
 
@@ -482,11 +489,19 @@ Con la **ley de los grandes números** podemos ver que en pruebas independientes
   <img src="readme_img/grandes-numeros.png" width="30%">
 </div>
 
+La probabilidad de que la media de las muestras, cuando n tiende a infinito, sea igual a la media de la población, es 1
+
 ### Falacia del apostador
 
 La **falacia del apostador** señala que después de un evento extremo, ocurrirán eventos menos extremos para nivelar la media.
 
 La _regresion a la media_ señala que después de un evento aleatorio extremo, el siguiente evento probablemente será menos extremo.
+
+
+Un ejemplo de esto pueden ser las ruletas de MonteCarlos; Si en una ruleta caen 32 rojos seguidos, es posible pensar que luego podrían venir varios negros seguidos para equilibrar la media. Sin embargo, cada evento es independiente, la probabilidad de que salga un rojo o un negro continuará siendo 50/50.
+
+
+Ahora vamos a profundizar en algunos elementos de la inferencia estadística.
 
 ## Media
 
