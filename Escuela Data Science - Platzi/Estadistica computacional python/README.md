@@ -6,9 +6,10 @@
   <img src="readme_img/python.png" width="250">
 </div>
 
+
 # Introducción al documento
 
-El contenido de este documento esta basado en el curso del mismo nombre dictado por [David Aroesti](https://github.com/jdaroesti) en [Platzi](https://platzi.com/r/karlbehrens/). Estas notas son a partir de un fork a las notas de [Karl Behrens](https://github.com/karlbehrensg)
+El contenido de este documento esta basado en el curso del mismo nombre dictado por [David Aroesti](https://github.com/jdaroesti) en [Platzi](https://platzi.com/r/jrmelendezm_/). Estas notas son a partir de un fork a las notas de [Karl Behrens](https://github.com/karlbehrensg)
 
 # Tabla de contenido
 - [Objetivos](#Objetivos)
@@ -512,6 +513,7 @@ La **media** es una medida de tendencia central, comúnmente conocido como prome
 </div>
 
 Una forma de calcular la media con Python seria la siguiente.
+En este codigo vamos a generar una lista de 20 elementos (con list comprehension) que tome un numero aleatorio entre 0 y 21.
 
 ```py
 import random
@@ -520,7 +522,7 @@ def media(X):
     return sum(X) / len(X)
 
 if __name__ == '__main__':
-    X = [random.randint(9, 12) for i in range(20)]
+    X = [random.randint(0, 21) for i in range(20)]
     mu = media(X)
 
     print(f'Arreglo X: {X}')
@@ -531,17 +533,22 @@ if __name__ == '__main__':
 
 ### Varianza
 
-La **varianza** mide qué tan propagados se encuentran un conjunto de valores aleatorios de su media. Mientras que la **media** nos da una idea de dónde se encuentran los valores, la **varianza** nos dice que tan dispersos se encuentran. La **varianza** siempre debe entenderse con respecto a la media.
+Mientras que la media nos da un medida de tendencia central (donde se encuentran la mayoria de los valores), la varianza y la desviacion estandar es una medida de propagación.
+
+
+La **varianza** mide qué tan propagados se encuentran un conjunto de valores aleatorios de su media. Mientras que la **media** nos da una idea de dónde se encuentran los valores, la **varianza** nos dice que tan dispersos se encuentran. La **varianza** siempre debe entenderse con respecto a la media. La varianza y desviacion estandar se expresan en terminos de la media.
+
+La forma en la que calculamos la variancia es:
 
 <div align="center"> 
   <img src="readme_img/varianza.png" width="30%">
 </div>
 
+Recorremos un array y vemos la diferencia con respecto a la media, elevamos al cuadrado y dividimos entre la cantidad de elementos del array.
+
 ### Desviación estándar
 
-La **desviación estándar** es la raíz cuadrada de la **varianza**. Nos permite entender, también, la propagación y se debe entender siempre relacionado con la **media**.
-
-La ventaja sobre la **varianza** es que la desviación estándar está en las mismas unidades que la **media**.
+La **desviación estándar** es la raíz cuadrada de la **varianza**. Nos permite entender, también, la propagación y se debe entender siempre relacionado con la **media**. Nos permite hablar en termino de la variabilidad en las mismas unidades. La ventaja sobre la **varianza** es que la desviación estándar está en las mismas unidades que la **media**.
 
 <div align="center"> 
   <img src="readme_img/desviacion-estandar.png" width="30%">
@@ -585,13 +592,17 @@ if __name__ == '__main__':
 
 ## Distribución Normal
 
-La **distribución normal** es una de las distribuciones mas recurrentes en cualquier ámbito. Se define completamente por su **media** y su **desviación estándar**. Permite calcular **intervalos de confianza** con la regla empírica.
+La **distribución normal** es una de las distribuciones mas recurrentes en cualquier ámbito. Se define completamente por su **media** y su **desviación estándar**. Permite calcular **intervalos de confianza** con la regla empírica. Puede encontrarse en cualquier parte: Altura de una poblacion, Sus ingresos, Lenguajes de programacion mas utilizados, etc. Esta distribucion tiene propiedades estadisticas muy interesantes y nos permite calcular las probabilidades de que "suceda algo" a partir de la regla empirica.
 
+
+La formula de la distribucion normal tiene la siguiente forma: 
 <div align="center"> 
   <img src="readme_img/distribucion-normal.png" width="30%">
 </div>
 
-En el siguiente ejemplo vamos una unas distribuciones con desviación estándar 1 y 3. Cuando la desviación es baja significa la variabilidad de los datos es menor.
+Recordemos que sigma es la desviacion estandar y mu es la media.
+
+En el siguiente ejemplo vamos una unas distribuciones normales con desviación estándar 1 y 3. Cuando la desviación es baja significa la variabilidad de los datos es menor. Se observa que hay una simetría respecto a la media y el efecto de una desviación estandar pequeña. 
 
 <div align="center"> 
   <img src="readme_img/variation-samples.webp" width="60%">
@@ -599,7 +610,7 @@ En el siguiente ejemplo vamos una unas distribuciones con desviación estándar 
 
 ### Regla empírica
 
-También conocida como la regla 68-95-99.7. Señala cuál es la dispersión de los datos en una distribución normal a uno, dos y tres sigmas.
+También conocida como la regla 68-95-99.7. Señala cuál es la dispersión de los datos en una distribución normal a uno, dos y tres sigmas. Es decir, cómo se distribuyen los datos en una distribucion normal. Nos dice cuales son los datos que podemos encontrar a 1 sigma de distancia, a 2 sigmas de distancia o 3 sigmas de distancia
 
 Permite calcular probabilidades con la densidad de la distribución normal.
 
@@ -607,19 +618,35 @@ Permite calcular probabilidades con la densidad de la distribución normal.
   <img src="readme_img/regla-empirica.png" width="30%">
 </div>
 
+Nuestra probabilidad de encontrar los datos a 1 desviación estandar es 68%, a 2 desviaciones estandar es 95% y a 3 desviaciones estandar es 99%
+
+
+En el siguiente grafico lo podemos ver más visual. Lo importante es fijarse en la densidad de los datos respecto a la media.
 <div align="center"> 
   <img src="readme_img/distribucion-normal-grafico.png" width="70%">
 </div>
+
+
+
 
 # Simulaciones de Montecarlo
 
 ## ¿Qué son las Simulaciones de Montecarlo?
 
-Permite crear simulaciones para predecir el resultado de un problema, además de convertir problemas determinísticos en problemas estocásticos.
+
+
+Permite crear simulaciones para predecir el resultado de un problema, además de convertir problemas determinísticos en problemas estocásticos. Utilizan la aleatoriedad para poder resolver problemas. 
 
 Es utilizado en gran diversidad de áreas, desde la ingeniería hasta la biología y el derecho.
 
+Permite resolver problemas que, en principio, no son aleatorios. Como por ejemplo calcular el área de un círculo y el valor de PI. 
+
 ## Simulación de Barajas
+
+Intentaremos simular un juego de barajas. Por ejemplo, Cual es la probabilidad de que salga un par? u otras manos de poker.
+
+Las barajas tienen 4 palos (corazon, diamante, rebol, pica). Van hasta el 10 y luego vienen JQK. Primero tendremos que construir la baraja e ir sacando cartas para ver cuales son nuestras probabilidades.
+
 
 ```py
 import random
@@ -674,7 +701,25 @@ if __name__ == '__main__':
 
 ## Cálculo de PI
 
+Videos recomendados:
+https://www.youtube.com/watch?v=sJVivjuMfWA
+https://www.youtube.com/watch?v=DQ5qqHukkAc
+https://www.youtube.com/watch?v=pvimAM_SLic
+
+
+Para este calculo nos basamos en las agujas de buffon. Suponiendo que tenemos un circulo inscrito en un cuadrado, y sabiendo el área del circulo y el área del cuadrado, podemos simular que estamos lanzando dardos aleatorios (muchos dardos) de tal manera que si sacamos la relación de los dardos dentro del cuadrado y los que logran estar dentro del circulo, podemos tener la razón de las áreas y aproximarnos a pi.
+
 Calcularemos PI con puntos al azar esparcidos en un plano cartesiano utilizando los scripts de **desviación estándar** y **media** que creados anteriormente. Queremos tener un **95% de certeza**, entonces para ello realizaremos el cálculo para 1/2 del área de un circulo, optimizando nuestros recursos.
+
+
+Él resultado de nuestra implementación nos dará un valor de PI. A continuación una gráfica para representar nuestra implementación
+
+
+<div align="center"> 
+  <img src="readme_img/pi_calc.jpeg" width="250">
+</div>
+
+
 
 ```py
 import random
@@ -744,11 +789,11 @@ Est=3.14154, sigma=0.00457, agujas=32000
 
 ## Muestreo
 
-El **muestreo** es muy importante cuando no tenemos acceso a toda la población que queremos explorar. Uno de los grandes descubrimientos de la estadística es que las **muestras aleatorias** tienden a mostrar las mismas propiedades de la población objetivo. Hasta este punto todos los **muestreos** que hemos hecho son de tipo **probabilísticos**.
+El **muestreo** es muy importante cuando no tenemos acceso a toda la población que queremos explorar. Uno de los grandes descubrimientos de la estadística es que las **muestras aleatorias** tienden a mostrar las mismas propiedades de la población total. Nosotros podemos obtener mas muestras, lo que hara que la media sea mas precisa o podemos tener tamaños de muestra grande que hará que la desviacion estandar sea mas pequeña pero lo importante es que podemos tener conclusiones válidas a partir de muestreos de la poblacion. Hasta este punto todos los **muestreos** que hemos hecho son de tipo **probabilísticos**. Este muestreo tiene dos tipos de formas para utilizarse: 
 
 En un **muestreo aleatorio** cualquier miembro de la población tiene la misma probabilidad de ser escogido.
 
-En un **muestreo estratificado** tomamos en consideración las características de la población para partirla en subgrupos y luego tomamos muestras de cada subgrupo, esto incrementa la probabilidad de que el muestreo sea representativo de la población.
+En un **muestreo estratificado** tomamos en consideración las características de la población para partirla en subgrupos y luego tomamos muestras de cada subgrupo, esto incrementa la probabilidad de que el muestreo sea representativo de la población. Esto se hace para no sesgar la muestra cuando existen diferencias relevantes dentro de la poblacion. Por ejemplo, para entender los estudiantes de platzi que saben programar, lo mejor sería dividir los estudiantes por ramas puesto que la mayoria se encuentra en Desarrollo e Ingenieria y una muestra aleatoria podría estar sesgada
 
 ## Teorema del Límite Central
 
@@ -775,3 +820,14 @@ Los **datos experimentales** son aquellos que se generan a través del **método
 La **regresión lineal** nos permite aproximar una función a un conjunto de datos obtenidos de manera experimental. No necesariamente permite aproximar funciones lineales, sino que sus variantes permiten aproximar cualquier **función polinómica.**
 
 Para ver un ejemplo de regresiones lineales en _Python_ en el siguiente enlace puedes acceder a ver un ejemplo: [Collab - Regresión Lineal.](https://colab.research.google.com/drive/1c0Lx0xQyxuoZsnVKZzMFcANykA5VWN5F)
+
+
+Algunas librerías de visualización de Python:
+
+    Bokeh
+    Matplotlib
+    Seaborn
+    plotly
+    Altair
+
+    
