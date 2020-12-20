@@ -14,6 +14,8 @@ Incluyen contenido de plataformas como Platzi, Coursera y EdX
 * Introducción al pensamiento computacional con Python 
 * POO y algoritmos con Python
 * Fundamentos de bases de datos
+* Estadística Computacional
+
 
 **Coursera: Applied Data Science with Python - Coursera Specialization - Michigan University**
 * Introduction to Data Science
@@ -21,3 +23,4 @@ Incluyen contenido de plataformas como Platzi, Coursera y EdX
 **EdX**
 * Using Python for Research - HarvardX
 * Fundamentos y construccion de modelos de prediccion con Machine Learning - Anahuac Online 
+* Algorithms - BombayX
