@@ -15,6 +15,7 @@ Incluyen contenido de plataformas como Platzi, Coursera y EdX
 * POO y algoritmos con Python
 * Fundamentos de bases de datos
 * Estadística Computacional
+* Fundamentos Prácticos de Machine Learning
 
 
 **Coursera: Applied Data Science with Python - Coursera Specialization - Michigan University**
