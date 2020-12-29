@@ -46,9 +46,13 @@ La **programación probabilística** utiliza _probabilidades_ y _modelos probabi
 
 Existen lenguajes y librerías especializadas para ejecutar este tipo de cómputo, como _Pyro_ de Uber.
 
+Uber necesita constantemente unir a los conductores y sus clientes. Además, necesita el tiempo estimado que le tomara al conductor llegar de un punto A a un punto B. Uber crea una hipotesis del tiempo probable estimado y la va actualizando constamentemente según recolecta información de lo que va ocurriendo.
+
 ## Probabilidad condicional
 
-La **probabilidad condicional** es la probabilidad de que ocurra un evento _A_, sabiendo que también sucede otro evento _B_. La probabilidad condicional se escribe _P(A|B)_, y se lee _«la probabilidad de A dado B»_.
+No siempre tendremos la **probabilidad independiente**, donde los eventos no están relacionados unos con otros. Por ejemplo, cada jugada en la ruleta es un evento independiente y por tanto en cada tiro se "reinician" las probabilidades. 
+
+La **probabilidad condicional** es la probabilidad de que ocurra un evento _A_, sabiendo que también sucede otro evento _B_. La probabilidad condicional se escribe _P(A|B)_, y se lee _«la probabilidad de A dado B»_. Depende de otro evento.
 
 No tiene por qué haber una relación causal o temporal entre _A_ y _B_. _A_ puede preceder en el tiempo a _B_, sucederlo o pueden ocurrir simultáneamente. _A_ puede causar _B_, viceversa o pueden no tener relación causal. Las relaciones causales o temporales son nociones que no pertenecen al ámbito de la probabilidad. Pueden desempeñar un papel o no, dependiendo de la interpretación que se le dé a los eventos.
 
@@ -62,7 +66,7 @@ Un ejemplo de esto puede ser la probabilidad que una persona **tenga cáncer**, 
 
 <img src="readme_img/pcancer.svg" height="15">
 
-Otro ejemplo es cual es la probabilidad de que una persona **use drogas**, pero como dato adicional esta persona es músico.
+Otro ejemplo es cual es la probabilidad de que una persona **use drogas**, pero como dato adicional esta persona es músico. Que probabilidad hay de que juan sea musico y use drogas?
 
 <img src="readme_img/pdrogas.svg" height="15">
 
@@ -95,6 +99,9 @@ Como sabemos que <img src="readme_img/pb.svg" height="15"> podemos reemplazarlo 
 <br>
 
 En este [enlace](https://www.youtube.com/watch?v=HZGCoVF3YvM&t) _(en inglés)_ podras encontrar un video práctico sobre el **Teorema de Bayes.**
+En este [enlace](https://www.youtube.com/watch?v=Fi6G48j0IZ4) puedes encontrar un ejercicio sencillo resuelto.
+
+En este otro [enlace](https://www.skobelevs.ie/BayesTheorem/) hay una programa interactivo del Teorema de Bayes
 
 
 ## Ejercicio de Bayes en código
