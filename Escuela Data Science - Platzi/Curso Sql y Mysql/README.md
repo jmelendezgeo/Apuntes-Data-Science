@@ -15,7 +15,7 @@ Con el curso de SQL se conocerá el lenguaje de consulta estructurada que te per
 ## Objetivos del documento
 
 - Crear bases de datos
-- Cruza información para la obtención de resultados
+- Cruzar información para la obtención de resultados
 - Consulta información en la bases de datos
 
 ## Tabla de contenido
@@ -101,21 +101,29 @@ $ mysql -h <dirección_de_nuestro_servidor> -u <usuario> -p -P <puerto>
 Enter password: <aquí introducirías tu password>?
 ```
 
+En un principio, luego de instalar mysql, no podrás conectarte con algun usuario. La manera de entrar por defecto a mysql sin que te pida usuario o contraseña es a través de: 
+
+```shell
+sudo mysql
+```
+Dentro del entorno de mysql, debes hacer un cambio de la password nativa de mysql por una password que elijas. Debe cumplir con unas especificaciones según el nivel de validación de seguridad (Low, Medium o Hard). 
+
+
 Comandos usados en esta sección:
 
 - `show databases;` -> lista las bases de datos que tiene el servidor
 
-- `use name_database;`-> selecciona o se conecta a la base de datos a trabajar
+- `use [name_database];`-> selecciona o se conecta a la base de datos a trabajar
 
 - `show tables;` -> muestra las tablas que contiene la base de datos
 
 - `select database();` -> muestra cual es la base de datos que tenemos seleccionada o en la que se esta trabajando.
 
-> Todos los comandos deben de terminar con “;”
+> Todos los comandos deben de terminar con “;”.
 
 ### ¿Qué es una base de datos?
 
-Se llama **base de datos**, o también banco de datos, a un conjunto de información perteneciente a un mismo contexto, ordenada de modo sistemático para su posterior recuperación, análisis y/o transmisión.
+Se llama **base de datos**, o también banco de datos, a un conjunto de información perteneciente a un mismo contexto, ordenada de modo sistemático para su posterior recuperación, análisis y/o transformación.
 
 Es un lugar donde podemos ir almacenando datos puntuales de cualquier cantidad de cosas para después operar sobre esos datos y convertirlos en información. Esa información convertirla en operaciones de negocio y las operaciones de negocio convertirlas en dinero, crecimiento sabiduría lo que sea. **TODO RESIDE EN LOS DATOS Y CÓMO OPERAMOS SOBRE LOS DATOS**.
 
@@ -151,11 +159,41 @@ Dos tipos de tablas por defecto en MySQL:
   - Permite hacer búsquedas full-text (mysql >= 5.6)
 
 > En la vida real usamos las tablas con dos propósitos:
->
+>La estrategia aqui es que hablaremos de dos propositos para nuestra base de datos: Catalogo y Operacion. Donde, por ejemplo, las de catalogo creceran en un orden lento (puede ser listado de usuario) que no es comparable con el crecimiento de una base de datos de prestamos de libros de una biblioteca. Se esperaria que diariamente se realizaran muchos prestamos de libros, a mayor velocidad, que el crecimiento de nuevos usuarios
 > - **Catalogo**: crecerá en un orden lento, según las necesidades de la propia BD. (Listado de Usuarios, InnoDB)
 > - **Operación**: se enfocan a lectura, mayor acceso a disco duro. (Prestamos de libros, MyISAM).
 
+**InnoDB y MyISAM**
+
+Supongamos que vamos a construir un blog sobre autos deportivos. Vamos a tener **usuarios** que publican posts, cada uno perteneciente a una **categoría** y con una o muchas **etiquetas**. Además, pueden escribir **comentarios** en cada artículo. Cada cosa remarcada es lo que llamamos _entidad_, la cual posee _atributos_ que la caracterizan y _relaciones_ con algunas otras. En MySQL nosotros llamamos a las entidades **tablas** y a las bases de datos que alojan estas entidades **esquemas**. Donde nos centraremos es que en las tablas a veces se reciben muchos registros en un tiempo corto pero tambien muchas consultas en segundos. Por ejemplo, todas las semanas se registran nuevos usuarios per cada dia se leen más de 10000 veces los posts del sitio.
+
+* ¿Vamos a escribir datos muy seguido?
+* ¿Necesitamos hacer consultas constantemente?
+* ¿Es importante cumplir con ACID (Atomicidad, Consistencia, Aislamiento, Durabilidad)?
+
+Todo esto debe ser respondido antes de crear la estructura de cada entidad. Una vez que lo hayamos hecho es hora de escoger el engine correcto para construir nuestras tablas 
+
+* InnoDB es el rey de la escritura. Es un motor diseñado para fortalecer la Atomicidad, Consistencia, Aislamiento y Durabilidad en una base de datos. ¿Vamos a hacer uso de las sentencias _INSERT_ y _UPDATE_? InnoDB.
+* MyISAM es el rey de la lectura. Si estamos hablando de velocidad para hacer consultas, el claro ganador es MyISAM. Nuestro blog recibira miles y miles de vistas todos los dias, seria un desastre que nuestro esquema tardara mas de lo esperado en responder a nuestro backend. Por ende, como vamos a reproducir multiples sentencias _SELECT_, MyISAM deberia formar parte del core de nuesta tabla 
+
+
+
 ### Comando CREATE
+
+Primero debemos crear una base de datos. 
+Podemos usar 
+
+```sql
+CREATE DATABASE nombre_database;
+);
+```
+Esto nos creara la database. Sin embargo, podriamos blindar la sentencia al decirle "Crea la base de datos si no existe". Esto se hace porque, de existir la base de datos, nos dice _Query OK_ y nos muestra un warning indicando que la base de datos ya existe. Si intentamos crear una base de datos sin esto, nos devolverá un error porque la base de datos ya existe.
+
+```sql
+CREATE DATABASE IF NOT EXISTS nombre_database;
+```
+
+
 
 ```sql
 CREATE TABLE IF NOT EXISTS nombre_tabla_en_plural (
@@ -163,7 +201,17 @@ CREATE TABLE IF NOT EXISTS nombre_tabla_en_plural (
 );
 ```
 
+
+
+
 ### Tipos de columnas / Creación de la tabla books
+
+**Tips**
+
+* Es recomendable que al momento de nombrar tablas lo hagamos en plural: book:books por convención
+* Por convención (Buena práctica importante que ahorra muchos dolores de cabeza) toda tabla necesita un id. Una forma única de relacionarse. Es una manera Universal de referirnos a una unica tupla (porque p.e hay libros que se llaman igual pero tienen diferentes autores). Idealmente que tenga un autoincrement si son enteros.
+
+
 
 #### Tipos de datos para columnas mas comunes
 
@@ -177,10 +225,10 @@ CREATE TABLE IF NOT EXISTS nombre_tabla_en_plural (
 - `COMMENT`: Comentario a la columna que solo es visible para quien este manejando la base de datos
 - Para imagenes asignamos `VARCHAR`.
 
-> NOTA: no se guarda la imagen como tal, guardamos el url del origen de la imagen.
+> NOTA: no se guarda la imagen como tal, guardamos el url del origen de la imagen. No se guardan archivos binarios en la base de datos relacional, nunca guardar una imagen, pero si una referencia.
 
-- `FLOAT` es utilizado para calculos precisos, `DOUBLE` puede ser aplicado de forma simple a los precios de una libreria (en este caso).
-- `DOUBLE` (espacios que podremos llenar, espacios asignados para numeros decimales)
+- `FLOAT` es utilizado para calculos precisos, `DOUBLE` puede ser aplicado de forma simple a los precios de una libreria (en este caso). FLOAT maneja 6 decimales de precision.
+- `DOUBLE` (espacios que podremos llenar, espacios asignados para numeros decimales). Por ejemplo DOUBLE (6,2) es 4 numeros antes de la coma y dos decimales.
 - `TEXT` permite agregar texto, grandes cantidades de caracteres.
 - `TINYINT` Es un número entero con o sin signo. Con signo el rango de valores válidos va desde -128 a 127. Sin signo, el rango de valores es de 0 a 255. `TINYINT(1)` = BOOL (0 o 1), también llamado bandera.
 - `TINYTEXT`, `TEXT`, `BIGTEXT`: Textos de diferente cantidad de espacios soportados, de menor a mayor respectivamente.
@@ -202,19 +250,20 @@ CREATE TABLE IF NOT EXISTS books (
 );
 ```
 
+
 ### Tipos de columnas / Creación de la tabla authors
 
 #### Tips/Recomendaciones
 
 - La tablas de bases datos necesitan una `PRIMARY KEY` osea un “id” para **identificar los registros**.
 
-> **Es buena práctica**: MySQL permite minúsculas y mayúsculas en el nombre de tablas y sentencias sql, pero es recomendable colocar en mayúsculas las sentencias(palabras reservadas) sql y todo lo relaciona con lo propio de MySQL y en minúscula el nombre de tablas y columnas.
+> **Es buena práctica**: MySQL permite minúsculas y mayúsculas en el nombre de tablas y sentencias sql, pero es recomendable colocar en mayúsculas las sentencias(palabras reservadas) sql y todo lo relaciona con lo propio de MySQL y en minúscula el nombre de tablas y columnas (lo relacionado a nosotros).
 
 - Como la relación entre tablas es lógica y se realiza mediante los id, en la tabla en donde se referencia la columna debe ser del mismo tipo de datos.
 
 - **El error vs Warnings**: la diferencia entre estos dos es que el error rompe cualquier flujo de trabajo que tengamos en nuestra aplicación mientras que el warnnigs nos muestra una advertencia que no rompe el flujo de trabajo workflow.
 
-- Cuando queremos usar una palabra reservada del lenguaje como nombre de alguna columna lo colocamos encerrado entre comillas de acento ejemplo: year.
+- Cuando queremos usar una palabra reservada del lenguaje como nombre de alguna columna lo colocamos encerrado entre comillas de acento ejemplo: year (que es una palabra reservada). Ojo en la diferencia: No son comillas dobles "", comillas simples '' y comillas de acento ``
 
 #### Comandos sql
 
@@ -256,13 +305,13 @@ CREATE TABLE IF NOT EXISTS authors(
 
 #### Tipos de datos usados | columnas de buena práctica
 
-- El no colocar `AUTO_INCREMENT` a la columna que es PRIMARY KEY simplemente vuelve el proceso de asignar id a una forma manual o se puede asignar desde otra capa de negocios.
+- El no colocar `AUTO_INCREMENT` a la columna que es PRIMARY KEY simplemente vuelve el proceso de asignar id a una forma manual o se puede asignar desde otra capa de negocios. Depende mucho de los gustos. Sin embargo, que esto parta desde la base de datos puede ahorrar problemas y mejora compatibilidades.
 
-- `UNIQUE`, la columna que tenga el constraint **unique** garantiza que el valor que se guarda en esa columna sea único
+- `UNIQUE`, la columna que tenga el constraint **unique** garantiza que el valor que se guarda en esa columna sea único. Esto podria funcionar por ejemplo si solamente aceptamos 1 cliente por correo.
 
-- `TIMESTAMP` Está basado en el número **epoch** que es el **1 enero de 1970** hasta la fecha y es donde se determina el inicio de las computadoras. Es un número entero que se guarda en segundos y permite hacer operaciones sobre él.
+- `TIMESTAMP` Está basado en el número **epoch** que es el **1 enero de 1970** hasta la fecha y es donde se determina el inicio de las computadoras. Es un número entero que se guarda en segundos y permite hacer operaciones sobre él. Es muy eficiente a la hora de hacer calculos y cualquier lenguaje puede luego transformarlo en un formato deseado como, por ejemplo 'yyyy-mm-dd hh:mm:ss'
 
-- `DATETIME` Este tipo de dato puede guardar cualquier valor de tipo fecha sin restricción. Incluso anterior a nuestra era. Por eso las fechas de nacimiento de usuarios debe utilizar este valor para garantizar que podemos registrarlos con la fecha adecuada.
+- `DATETIME` Este tipo de dato puede guardar cualquier valor de tipo fecha sin restricción. Incluso anterior a nuestra era. Por eso las fechas de nacimiento de usuarios debe utilizar este valor para garantizar que podemos registrarlos con la fecha adecuada (por si nacieron antes de 1970).
 
 > TIMESTAMP vs DATETIME: hay que resaltar que:
 > 1. `TIMESTAMP` “NO PUEDE HACER TODO LO DE `DATETIME` pero `DATETIME` SÍ PUEDE HACERLO DE UN `TIMESTAMP`”.
@@ -272,13 +321,13 @@ CREATE TABLE IF NOT EXISTS authors(
 
 Es buena práctica no eliminar registros de una bases de datos es por ello que se crea una columna como active que es un valor booleano. Dicho valor sirve para para decir si el registro está activo o no.
 
-- `created_ad` y `updated_ad`
+- `created_at` y `updated_at`
 
 Es buena práctica tener una columna que permite saber el momento exacto en el que se crea un registro o se actualiza. Este tipo de dato se comporta más como una meta-información y nos puede ayudar, por ejemplo, a cuántos usuarios fueron creados en una fecha en específico, saber cuando una tupla se actualizó, etc.
 
 - `created_ad`
 
-Es una columna de buena práctica que permite saber cuando se creó un registro. Está utilizará un conjunto de propiedades llamada entre ella se colocará `DEFAULT CURRENT_TIMESTAMP` . Cuando se realiza un insert sí el valor de esta columna viene vacío colocará en la tupla el valor de la fecha en que se creó de manera automática .
+Es una columna de buena práctica que permite saber cuando se creó un registro. Está utilizará un conjunto de propiedades llamada entre ella se colocará `DEFAULT CURRENT_TIMESTAMP` . Cuando se realiza un insert sí el valor de esta columna viene vacío colocará en la tupla el valor de la fecha en que se creó de manera automática. Tambien vamos a querer que se actualice un `update_at` con la hora en el que hacemos una actualizacion al registro.
 
 #### Creación de la tabla clientes
 
