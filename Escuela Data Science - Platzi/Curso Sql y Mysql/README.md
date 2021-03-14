@@ -325,7 +325,7 @@ Es buena práctica no eliminar registros de una bases de datos es por ello que s
 
 Es buena práctica tener una columna que permite saber el momento exacto en el que se crea un registro o se actualiza. Este tipo de dato se comporta más como una meta-información y nos puede ayudar, por ejemplo, a cuántos usuarios fueron creados en una fecha en específico, saber cuando una tupla se actualizó, etc.
 
-- `created_ad`
+- `created_at`
 
 Es una columna de buena práctica que permite saber cuando se creó un registro. Está utilizará un conjunto de propiedades llamada entre ella se colocará `DEFAULT CURRENT_TIMESTAMP` . Cuando se realiza un insert sí el valor de esta columna viene vacío colocará en la tupla el valor de la fecha en que se creó de manera automática. Tambien vamos a querer que se actualice un `update_at` con la hora en el que hacemos una actualizacion al registro.
 
@@ -366,7 +366,7 @@ CREATE TABLE IF NOT EXISTS operations(
 ### Comando INSERT
 
 > Buenas prácticas:
-> 1. Tener una buen modelo de bases de datos y un buen modelo de negocio que evite la duplicidad de información ya que esto nos ahorra el tiempo de procesamiento, ahorra en espacio.
+> 1. Tener una buen modelo de bases de datos y un buen modelo de negocio que evite la duplicidad de información ya que esto nos ahorra el tiempo de procesamiento, ahorra en espacio. Por ejemplo, creamos una tabla de autores porque puede darse el caso que varios libros tengan el mismo autor y , de esta forma, no escribimos el nombre del mismo autor varias veces.
 > 2. Realizar inserciones de 50 registros máximo. Esto no es necesariamente obligatorio pero funciona muy bien y esto se hace porque sí hay algún problema en la inserción sólo se pierde datos de 50 a 50.
 
 Formas de insertar:
@@ -377,8 +377,8 @@ Formas de insertar:
 versiones de mysql que tengamos instalados estas son
 algunas de ellas*/
 INSERT INTO  authors (author_id,name,nationality) VALUES (NULL,'Juan Rulfo','MEX');
-INSERT INTO  authors (author_id,name,nationality) VALUES (NULL,'Gabriel García Máquez','COL');
-INSERT INTO  authors VALUES ('Juan Gabriel Vasquez','COL');
+INSERT INTO  authors (name,nationality) VALUES (NULL,'Gabriel García Máquez','COL');
+INSERT INTO  authors VALUES (NULL,'Juan Gabriel Vasquez','COL');
 ```
 2. 
 ```sql
@@ -397,6 +397,8 @@ INSERT INTO  `authors` (name,nationality)
 /*o si sabemos que hay un id que no existe podemos insertarlos juntos con su  id*/
 INSERT INTO  `authors` (author_id,name,nationality)
     VALUES ('16','Pablo Neruda','MEX');
+
+
 ```
 
 ### Comando on duplicate key
@@ -421,6 +423,8 @@ Opciones:
   - `ON DUPLICATE KEY UPDATE active = 0;`
   - `ON DUPLICATE KEY UPDATE active = VALUES(active);`
 
+3. `ON DUPLICATE KEY UPDATE SET email=''` Esto nos esta indicando que, en el valor duplicado, hagamos un update. En este caso el valor duplicado seria el email y pedimos que se cambie por vacío
+
 ### Inserción de datos usando queries anidados
 
 Tenemos un archivo CVS con la siguiente información
@@ -429,6 +433,8 @@ Tenemos un archivo CVS con la siguiente información
 El laberinto de la Soledad | Octavio Paz | 1955
 Vuelta al laberinto de la Soledad | Octavio Paz | 1960
 ```
+
+Vemos que nuestro csv esta en formato Libro, autor, año. Pero si recordamos nuestra base de datos tienen una tabla para libros y otra para autores. Si queremos insertar el libro, ¿Como añadimos el author_id si tenemos es el nombre?
 
 Mediante un script de Python podemos obtener estos datos e ir iterando para las insercciones, pero el problema surge en que nuestra tabla de books tenemos solo el title y el year, el nombre del autor lo tenemos en otra tabla llamada authors.
 
@@ -447,6 +453,13 @@ VALUES ('Vuelta al laberinto de la Soledad',
 1960);
 ```
 
+Esto hará que, al ingresar el registro del author_id, se haga una subconsulta y se busque en la tabla de authores el id del autor cuyo nombre es 'Octavio Paz'. Esto es potente y funciona. 
+
+> Las consultas anidadas deben tratarse con cudiado porque eleva la complejidad del algoritmo y el timpo de ejecución (Puede elevarlo al cuadrado o duplicarlo). Lo ideal sería hacer ese proceso de limpieza en una capa previa a la base de datos, en algun lenguaje de programacion, y luego insertar la información correctamente según la estructuras de las tablas en la base de datos
+
+
+
+
 ## Bash y archivos SQL
 
 Se pueden traer grandes bases de datos sin tener que cargar todo manualmente desde la terminal bash directamente. Lo que hacemos es ir a la carpeta contenedora de los archivos desde la terminal y con el siguiente comando traemos los archivos sql:
@@ -463,9 +476,17 @@ mysql -u root -p < all_schema.sql
 mysql -u root -p -D proyecto_platzi < all_data.sql
 ```
 
+Shell lo que hara sera pasar todo el archivo a sql por lo que tiene que estar correctamente estructurado. Por ejemplo, debe incluso contener el comando "Use nombre_database" para que sql sepa sobre cual base de datos ejecutar las sentencias.
+
+
 ## SELECT
 
 ### Su majestad el SELECT | Comandos básicos
+
+- Traer toda la informacion de una tabla: 
+```sql
+SELECT * FROM clients;
+```
 
 - Traer solo una columna especifica (en este caso la columna “name”):
 
@@ -484,6 +505,7 @@ SELECT name, email, gender FROM clients;
 ```sql
 SELECT name, email, gender FROM clients LIMIT 10;
 ```
+> LIMIT siempre va al final de select.
 
 - Condicionar los resultados a una caracteristica (en este caso todos los resultados que tengan gender con el valor “M”):
 
@@ -496,6 +518,8 @@ SELECT name, email, gender FROM clients WHERE gender='M';
 ```sql
 SELECT YEAR(birthdate) FROM clients;
 ```
+> Ya los manejadores de bases de datos tienen integradas un monton de funciones. Por ejemplo, esta es una funcion que recibe informacion en formato date y extrae el año.
+
 
 - Mostrar el año actual
 
@@ -503,7 +527,7 @@ SELECT YEAR(birthdate) FROM clients;
 SELECT YEAR(NOW());
 ```
 
-- Listar los 10 primeros resultados de las edades de los clientes
+- Listar los 10 primeros resultados de las edades de los clientes (estos resultados no tienen un orden en particular). Vemos que aqui ya estamos haciendo calculos sencillos.
 
 ```sql
 SELECT YEAR(NOW()) - YEAR(birthdate) FROM clients LIMIT 10;
@@ -515,11 +539,12 @@ SELECT YEAR(NOW()) - YEAR(birthdate) FROM clients LIMIT 10;
 SELECT name, YEAR(NOW()) - YEAR(birthdate) FROM clients LIMIT 10;
 ```
 
-- Listar clientes que coincidan con el nombre de "Saave"
+- Listar clientes que coincidan con el nombre de "Saave". En este caso estamos usando funciones que actúan como condiciones. Al añadir el %Saave% decimos que no importa que haya antes o despues, queremos uno que incluya la cadena Saave en su nombre. 
 
 ```sql
 SELECT * FROM clients WHERE name LIKE '%Saave%';
 ```
+En este caso retorna toda la informacion de 'Pablo Saaveda'
 
 - Utilizar funciones para obtener datos especificos (en este caso todas las Mujeres que en su nombre tengan la cadena “Lop”), usando alias para nombrar la función como 'edad':
 
