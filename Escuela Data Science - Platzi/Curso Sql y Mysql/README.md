@@ -651,7 +651,7 @@ LIMIT 10;
 
 Ambos casos son iguales, pero el segundo se puede leer claramente mas rapido.
 
-- LEFT JOIN para traer datos incluso que no existen, como el caso del author_id = 4 que no tene ningún libro registrado.
+- LEFT JOIN para traer datos incluso que no existen, como el caso del author_id = 4 que no tene ningún libro registrado. Esto va a traer la tabla pivote (en este caso la de autores) con la informacion de la otra tabla.
 
 ```sql
 SELECT a.author_id, a.name AS 'author name', a.nationality, b.title AS 'title of book'
@@ -680,7 +680,9 @@ Salida:
 8 rows in set (0.00 sec)
 ```
 
-- Contar número de libros tiene un autor. Con COUNT (contar), es necesario tener un GROUP BY (agrupado por un criterio)
+- Contar número de libros que tiene un autor. Con COUNT() usamos una funcion para contar las entradas. Para poder utilizarla correctamente en este caso, es necesario tener un GROUP BY (agrupado por un criterio) sobre algun parametro. En este caso podriamos agrupar por el nombre del autor pero siempre que se pueda utilizar un id (author_id) deberiamos usarlo en lugar a cualquier cadena de caracteres que podria repetirse (tal vez hay autores distintos pero que se llaman igual).
+
+> Siempre que trabajemos con funciones como Sum(), Count(),Avg(),Max(),Min() debemos agregar la funcion GROUP cuando en el SELECT incluyamos otra columna para mostrar aparte de la funcion de agrupamiento de otra columna. Si no, solo mostrara el primer resultado de la funcion
 
 ```sql
 SELECT a.author_id, a.name AS 'author name', a.nationality, COUNT(b.book_id)
@@ -840,6 +842,8 @@ WHERE A.Key IS NULL OR B.Key IS NULL
 ![join_command_3](https://imgur.com/K0UvZM2.png)
 
 ![join_command_4](https://imgur.com/Os3DvYq.png)
+
+Más informacion: En esta [cheat sheet](https://learnsql.com/blog/sql-join-cheat-sheet/joins-cheat-sheet-a4.pdf)
 
 ### Casos de Negocios
 
@@ -1002,7 +1006,7 @@ ORDER BY TOTAL DESC, nationality;
 13 rows in set (0.00 sec)
 
 
--- Igual que antes pero ahora sin Austria tambien.
+-- Igual que antes pero ahora tampcoo queremos a Austria
 SELECT nationality , COUNT(author_id) TOTAL
 FROM authors
 WHERE nationality NOT IN ('RUS', 'AUT')
@@ -1231,15 +1235,39 @@ LEFT JOIN authors AS a
 
 - Los datos no deberían borrarse, siempre y cuando se respete el acuerdo con el usuario final.
 - **SIEMPRE** usar **WHERE** con comandos **UPDATE** o **DELETE**.
-- Al hacer **UPDATE** o **DELETE** usar **LIMIT** para limitar el impacto del comando si algo saliese mal.
+- Al hacer **UPDATE** o **DELETE** usar **LIMIT** para limitar el impacto del comando si algo saliese mal. Por ejemplo, si por alguna condicion que no consideramos se corresponde a 3 registros con el limit podriamos garantizar que solo se borraria 1
 
 Comandos:
 
-- `DELETE`: elimina información.
+- `DELETE`: elimina información. Usamos el delete from table para ese tipo de acciones, es un DML ( lenguaje de manipulación de datos) por tanto admite parámetros usando condiciones, es decir soporta la clausula WHERE además que te devuelve el numero de archivos afectados en la operación y puedes incluso usar el LIMIT. recuerden que el DELETE borra registros 1 por 1 además que la tabla recuerda el valor AUTO_INCREMENT en caso la hayas vaciado.
 - `UPDATE`: actualiza información en una tabla.
-- `TRUNCATE`: elimina el contenido de una tabla por completo.
+- `TRUNCATE`: elimina el contenido de una tabla por completo. Es decir, la vacía. En TRUNCATE lo que se realiza es destruir la tabla y luego recrearla ya que es un DLL (lenguaje de definición de datos), lo que lo hace más rápido y no devuelve registros afectados.
 
 **Código**:
+La estructura comun de un DELETE (recordando que **siempre** debemos ser lo mas especificos posibles) es la siguiente:
+
+```sql
+DELETE 
+FROM tabla
+WHERE
+  [columna = valor, ...] (Idealmente que sean ids)
+LIMIT
+  [condiciones]
+```
+
+
+La estructura comun de un UPDATE sería la siguiente:
+
+```sql
+UPDATE tabla
+SET 
+  [columna = valor, ...]
+WHERE
+  [condiciones]
+LIMIT
+  [valor]
+```
+
 
 ```sql
 -- Ejemplos de Delete y Update
@@ -1303,6 +1331,13 @@ WHERE
 TRUNCATE transactions;
 ```
 
+* ALTER es a las columnas lo que UPDATE es a las filas
+* DROP es a las columnas lo que DELETE es a las filas
+
+> El truncate elimina una tabla, y la crea de nuevo por lo que el resultado es que ahora tienes la tabla vacía. Si quisieras eliminar una tabla con su informacion y estructura puede usarse **DROP** tabla
+
+
+
 ## Consultas en MySQL
 
 ### Super QUERIES
@@ -1360,13 +1395,99 @@ GROUP BY nationality;
 12 rows in set (0.00 sec)
 
 ```
+Consultas tan elaboradas como esta y que pueden llegar a ser muy repetidas conviene guardaralas en una vista.
+Las vistas generan tablas a partir de las sentencias de SQL, y pueden ejecutarse a partir de su nombre unicamente.
+
+```sql
+-- Con esto puedes crear la vista que quedará guardada.
+CREATE VIEW books_nationality_year AS
+    SELECT a.nationality, COUNT(book_id) AS 'Total', 
+        SUM(IF(year < 1950, 1, 0)) as `< 1950`,  
+        SUM(IF(year < 1990 and year >= 1950, 1, 0)) as `< 1990`, 
+        SUM(IF(year < 2000 and year >= 1990, 1, 0)) as `< 2000`, 
+        SUM(IF(year >= 2000, 1, 0)) as `hoy`
+    FROM books as b
+    JOIN authors as a 
+    ON b.author_id = a.author_id
+    WHERE a.nationality IS NOT NULL
+    GROUP BY nationality;
+-- Con esto ejecutas la vista
+SELECT * FROM books_nationality_year;
+```
+
+
+
 
 ### Comando mysqldump
 
+
+Otras sentencias utiles que podriamos utilizar podrian ser:
+
+* Añadir una nueva columna: Añade la columna birthyear luego de name en la tabla authors
+```sql
+ALTER TABLE authors ADD COLUMN birthyear integer default 1930 after name;
+```
+* Modificar la columna creada: Hace modificaciones a la columna birthyear: ahora es tipo year y el default es 1920
+```sql
+ALTER TABLE authors MODIFY COLUMN birthyear year default 1920;
+```
+* Eliminar la columna:
+```sql
+ALTER TABLE DROP COLUMN birthyear;
+```
+* Mostrar solo algunas tablas
+```sql
+show tables like '%i%'
+```
+
+El comando mysqldump se utiliza para respaldar tu base de datos. Puedes respaldar la informacion (como crear un txt con todo lo de la base de datos.).
+
+
 > “El esquema se versiona, los datos se respaldan”
 
-- El comando `mysqldump -u root -p nombre_de_base_de_datos` te arrastra todo el **schema y los datos de la base de datos**. Si lo hacemos de la siguiente manera: `mysqldump -u root -p nombre_de_base_de_datos > base_de_datos_completa.sql` podemos guardar la base de datos en un archivo.
+- El comando `mysqldump -u root -p nombre_de_base_de_datos` podeos ejecutarlo en la terminal y te arrastra todo el **schema y los datos de la base de datos**. Esto te va a imprimir todo lo que necesitarias para generar de nuevo tu base de datos. Incluso incluye los comandos para eliminar si ya existe y luego crearla de nuevo con la informacion
+
+ Si lo hacemos de la siguiente manera: `mysqldump -u root -p nombre_de_base_de_datos > base_de_datos_completa.sql` podemos guardar la base de datos en un archivo.
   
-- El comando `mysqldump -u root -p -d nombre_de_base_de_datos > esquema.sql` te permite crear un documento con solo el **schema de la BD**.
+- El comando `mysqldump -u root -p -d nombre_de_base_de_datos > esquema.sql` te permite crear un documento con solo el **schema de la BD** (La creacion de las tablas pero sin los datos en la tabla)
 
 Nota: Recordar que para los dos comandos anteriores deben realizarse en una terminal fuera de la BD y estar ubicados en el directorio donde se desea guardar el archivo.
+
+## Comandos mas comunes del curso
+
+Les dejo los comandos más utilizados en el curso:
+
+* SHOW databases; - muestra las bases de datos existentes.
+* USE database_name; - selecciona una base de datos específica.
+* SHOW tables; - muestras las tablas de la base de datos.
+*SELECT database(); - me muestra el nombre de la base de datos seleccionada.
+* CREATE database database_name; - crea una nueva base de datos.
+* CREATE DATABASE IF NOT EXISTS database_name; - crea una base de datos si no existe.
+* SHOW warnings; - muestra las advertencias.
+* DROP table table_name; - Elimina permanentemente una tabla.
+* DESCRIBE table_name; - Nos indica las columnas que tenemos en una tabla.
+* SHOW FULL COLUMNS FROM table_name; - es parecido al comando DESCRIBE pero muestra mas datos.
+* INSERT INTO table_name(columns) VALUES(values); - inserta una tupla.
+* ON DUPLICATE KEY IGNORE ALL - esta sentencia ignora las resticciones al insertar una tupla
+con un valor repetido y que esta restringido en una columna con UNIQUE (Nota: nunca utilizarlo).
+* ON DUPLICATE KEY UPDATE column = VALUES(value) - al insertar una tupla con un campo duplicado
+actualiza un el valor de un campo específico con un nuevo valor tomado de los datos insertados.
+* SELECT * FROM table_name WHERE column_value = 1\G - en lugar de cerrar la sentencia con ;
+se utiliza \G, lo cual muestra los datos de una manera mas legible.
+* mysql -u root -p < all_schema.sql - con este comando podemos ejecutar un script SQL inmediatamente
+despues de acceder a la base de datos.
+* mysql -u root -p -D database_name < all_schema.sql - este comando es parecido al anterior solo
+que con la bandera -D indicamos el nombre de la base de datos sobre la que queremos ejecutar el script.
+* SELECT YEAR(NOW()); - esta sentencia me muestra el año de la fecha actual utilizando las funciones YEAR() y NOW().
+* SELECT * FROM table_name WHERE column_value like ‘%value%’; - esta sentencia nos muestra las tuplas que en un
+campo específico contengan un valor, el wildcard % indica que no nos importa que valor existan antes o despues del
+dato que especificamos.
+* SELECT COUNT(*) FROM table_name; - devuelve el número de tuplas de una tabla.
+* SELECT * FROM table_name WHERE column_value BETWEEN value AND value; - nos devuelve las tuplas que se encuentren
+en medio de los valores indicados.
+* DELETE FROM table_name WHERE column_value = value; - elimina una tupla de una tabla.
+* UPDATE table_name SET [column_value = value, …] WHERE column_value = value; - actualiza una tupla de una tabla.
+* TRUNCATE table_name; - borra todo el contenido de una tabla.
+* mysqldump -u user -p database_name > esquema.sql - guarda el esquema de una base de datos con todo y datos en un
+archivo sql.
+* mysqldump -u user -p -d database_name es parecido al comando anterior solo que aquí no se guardan los datos.
