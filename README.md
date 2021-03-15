@@ -19,6 +19,7 @@ Incluyen contenido de plataformas como Platzi, Coursera y EdX
 * [Curso de Web Scraping con XPATH](https://github.com/jmelendezgeo/Apuntes-Data-Science/tree/main/Escuela%20Data%20Science%20-%20Platzi/Fundamentos%20de%20Web%20Scraping%20con%20Python%20y%20Xpath)
 * [Curso de introduccion al Pensamiento Probabilistico](https://github.com/jmelendezgeo/Apuntes-Data-Science/tree/main/Escuela%20Data%20Science%20-%20Platzi/Introduccion%20al%20pensamiento%20probabilistico)
 * [Curso de Ingenieria de datos](https://github.com/jmelendezgeo/Apuntes-Data-Science/tree/main/Escuela%20Data%20Science%20-%20Platzi/Curso%20de%20Ingenieria%20de%20datos)
+* [Curso de SQL y MySQL](https://github.com/jmelendezgeo/Apuntes-Data-Science/tree/main/Escuela%20Data%20Science%20-%20Platzi/Curso%20Sql%20y%20Mysql)
 
 **Coursera: Applied Data Science with Python - Coursera Specialization - Michigan University**
 * [Introduction to Data Science](https://github.com/jmelendezgeo/Apuntes-Data-Science/tree/main/Applied%20Data%20Science%20with%20Python%20-%20Coursera%20Specialization%20/Introduction%20To%20Data%20Science)
