@@ -274,11 +274,19 @@ En los siguientes enlaces podemos encontrar gran cantidad de datset asi como tam
 - Google Platform API library: Las APIS de Google. Aqui tenemos AI de mapas, google sheets, etc.
 - [Datos del gobierno de MX](https://datos.gob.mx/)
 - [Datos del gobierno de CO](https://www.datos.gov.co/)
+- [Datos del gobierno de AR](https://datos.gob.ar/dataset?groups=econ)
+- [Datos de UE](https://data.europa.eu/euodp/en/data)
+- [Datos de Chile](http://datos.gob.cl/dataset)
 - [Dataset Search de Google](https://datasetsearch.research.google.com/)
+- [Datos de Peru](https://www.datosabiertos.gob.pe/)
 - [Data Word](https://data.world/)
 - [Kaggle](https://www.kaggle.com/)
+- [Our World in Data](https://ourworldindata.org/)
 - [Google AI HUB](https://aihub.cloud.google.com). Aqui podemos encontrar Datasets, Pipelines, notebooks,etc.
 - [Datasets de sensores remotos](https://developers.google.com/earth-engine/datasets/catalog)
+- [Observatorio Laboral de Colombia](https://ole.mineducacion.gov.co/portal/)
+- [Informacion espacial](https://www.diva-gis.org/Data)
+- [Microdata WorldBank](https://microdata.worldbank.org/index.php/home)
 
 
 ### ETL
@@ -334,6 +342,7 @@ Elementos básicos de la web:
 Para poder experimentar con la web necesitamos un método programático para solicitar URLs y obtener HTML
 
 **Requests**: Nos permite generar solicitudes a la web dentro de Python y utilizar los diferentes verbos HTTP, normalmente utilizaremos el método **GET** porque vamos a traer datos.
+Verbos: GET, POST, PUT, DELETE, PATCH, OPTIONS
 
 `requests.get('url')` para hacer una solicitud a la web y nos devolverá un objeto `response`
 
@@ -352,7 +361,13 @@ Estos códigos estan categorizados en los siguientes grupos:
 - 5xx : Errores en el lado del servidor (Ej: 500, 501, 502, etc.)
 
 Todas las solicitudes HTTP tienen metadatos para que los diferentes sistemas y computadoras puedan entender de qué va la solicitud.
+[Documentacion Mozilla](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)
 
+Si obtenemos un status code de 200 es OK, la solicitud ha tenido exito. Esto varía segun el metodo HTTP:
+GET: el recurso se ha recuperado y se transmite en el cuerpo del mensaje.
+HEAD: Los encabezados de entidad están en el cuerpo del mensaje.
+PUT o POST: El recurso que describe el resultado de la acción se transmite en el cuerpo del mensaje.
+TRACE: el cuerpo del mensaje contiene el mensaje de solicitud tal como lo recibió el servidor 
 
 ### ¿Cómo trabajar con un documento HTML?
 
